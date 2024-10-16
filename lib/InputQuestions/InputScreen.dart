@@ -1,123 +1,177 @@
 import 'package:flutter/material.dart';
+import '../models/problem.dart';
 
 class InputScreen extends StatefulWidget {
-  const InputScreen({super.key});
+  final List<Problem> problems;
+
+  const InputScreen({Key? key, required this.problems}) : super(key: key);
 
   @override
   State<InputScreen> createState() => _InputScreenState();
 }
 
 class _InputScreenState extends State<InputScreen> {
+  int _currentQuestionIndex = 0;
+  bool _isAnswered = false;
+  bool _isCorrect = false;
   final TextEditingController _controller = TextEditingController();
 
-  final List<String> _operators = ['+', '-', '×', '÷'];
+  void _checkAnswer() {
+    final userInput = _controller.text;
+    final userAnswer = double.tryParse(userInput);
+    final correctAnswer = widget.problems[_currentQuestionIndex].answer;
 
-  final List<String> _keys = [
-    '7', '8', '9', '÷',
-    '4', '5', '6', '×',
-    '1', '2', '3', '-',
-    '0', '.', '⌫', '+',
-  ];
+    if (userAnswer == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('有効な数値を入力してください。')),
+      );
+      return;
+    }
 
-  void _onKeyPress(String key) {
+    bool isCorrect = userAnswer == correctAnswer;
+
     setState(() {
-      if (key == '⌫') {
-        if (_controller.text.isNotEmpty) {
-          _controller.text = _controller.text.substring(0, _controller.text.length - 1);
-        }
-      } else {
-        _controller.text += key;
-      }
+      _isAnswered = true;
+      _isCorrect = isCorrect;
     });
+
+    if (isCorrect) {
+      _showSuccessAnimation();
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isCorrect ? '正解！' : '不正解'),
+        content: Text(isCorrect
+            ? 'おめでとうございます！正解です。'
+            : '残念、不正解です。正しい答えは$correctAnswerです。'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (_currentQuestionIndex < widget.problems.length - 1) {
+                setState(() {
+                  _currentQuestionIndex++;
+                  _isAnswered = false;
+                  _isCorrect = false;
+                  _controller.clear();
+                });
+              } else {
+                _showCompletionDialog();
+              }
+            },
+            child: const Text('次へ'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessAnimation() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 10),
+            Text('正解！'),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('終了'),
+        content: const Text('すべての問題を終えました！'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text('ホームに戻る'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildProblemItem() {
+    final problem = widget.problems[_currentQuestionIndex];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '問題 ${_currentQuestionIndex + 1}/${widget.problems.length}:',
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          problem.question,
+          style: const TextStyle(fontSize: 18),
+        ),
+        const SizedBox(height: 30),
+        TextFormField(
+          controller: _controller,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: '答えを入力してください',
+          ),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          style: const TextStyle(fontSize: 20),
+          readOnly: _isAnswered,
+          onFieldSubmitted: (_) => !_isAnswered ? _checkAnswer() : null,
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: _isAnswered ? null : _checkAnswer,
+          child: const Text('回答'),
+        ),
+        if (_isAnswered)
+          Row(
+            children: [
+              Icon(
+                _isCorrect ? Icons.check_circle : Icons.cancel,
+                color: _isCorrect ? Colors.green : Colors.red,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                _isCorrect ? '正解です！' : '不正解です。',
+                style: TextStyle(color: _isCorrect ? Colors.green : Colors.red),
+              ),
+            ],
+          ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('入力問題'),
+        title: Text('入力問題 (${_currentQuestionIndex + 1}/${widget.problems.length})'),
         centerTitle: true,
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Scrollbar(
-              child: SingleChildScrollView(
-                child: Container(
-                  color: Colors.white,
-                  alignment: Alignment.topLeft,
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-
-                    //あとから問題入れる
-                    children: List.generate(30, (index) =>
-                    Text(
-                      'テキスト ${index + 1}',
-                      style: const TextStyle(fontSize: 18, color: Colors.grey),
-                    )
-                    ),
-                    //ここまで
-
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-            child: TextFormField(
-              controller: _controller,
-              readOnly: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: '式を入力してください',
-              ),
-              style: const TextStyle(fontSize: 24),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: Container(
-              padding: const EdgeInsets.all(10.0),
-              color: Colors.grey[200],
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _keys.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 3.0,
-                  crossAxisSpacing: 20.0,
-                  childAspectRatio: 1.2,
-                ),
-                itemBuilder: (context, index) {
-                  String key = _keys[index];
-                  return ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _operators.contains(key)
-                          ? Colors.orange
-                          : (key == '⌫'
-                          ? Colors.red
-                          : Colors.blue),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    onPressed: () => _onKeyPress(key),
-                    child: Text(
-                      key,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: _buildProblemItem(),
       ),
     );
   }
 }
+
+

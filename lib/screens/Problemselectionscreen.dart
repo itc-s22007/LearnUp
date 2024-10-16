@@ -91,7 +91,7 @@ class MathProblemScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('$type'),
+        title: Text(type),
       ),
       body: Center(
         child: Text('ここに$typeの問題が表示されます。'),
