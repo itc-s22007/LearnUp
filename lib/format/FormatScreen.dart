@@ -1,33 +1,40 @@
 import 'package:flutter/material.dart';
 import '../InputQuestions/InputScreen.dart';
-import '../choiceQuestions/choiceScreen.dart';
+import '../choiceQuestions/ChoiceScreen.dart';
+import '../models/problem.dart';
 
 class FormatScreen extends StatefulWidget {
-  const FormatScreen({super.key});
+  final List<Problem> problems;
+
+  const FormatScreen({super.key, required this.problems});
 
   @override
-  State<FormatScreen> createState() => _HomeScreenState();
+  State<FormatScreen> createState() => _FormatScreenState();
 }
 
-class _HomeScreenState extends State<FormatScreen> {
-  bool showCircle = true;
+class _FormatScreenState extends State<FormatScreen> {
+  bool showChoice = true;
 
-  void _toggleShape() {
+  void _toggleFormat() {
     setState(() {
-      showCircle = !showCircle;
+      showChoice = !showChoice;
     });
   }
 
   void _navigateToNextScreen() {
-    if (showCircle) {
+    if (showChoice) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ChoicesScreen()),
+        MaterialPageRoute(
+          builder: (context) => ChoiceScreen(problems: widget.problems),
+        ),
       );
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const InputScreen()),
+        MaterialPageRoute(
+          builder: (context) => InputScreen(problems: widget.problems),
+        ),
       );
     }
   }
@@ -36,7 +43,7 @@ class _HomeScreenState extends State<FormatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('形式'),
+        title: const Text('形式選択'),
         centerTitle: true,
       ),
       body: Center(
@@ -55,19 +62,19 @@ class _HomeScreenState extends State<FormatScreen> {
                 );
               },
               child: Container(
-                key: ValueKey<bool>(showCircle),
-                width: 400,
-                height: 400,
+                key: ValueKey<bool>(showChoice),
+                width: 300,
+                height: 300,
                 decoration: BoxDecoration(
-                  color: showCircle ? Colors.red : Colors.blue,
-                  shape: showCircle ? BoxShape.circle : BoxShape.circle,
+                  color: showChoice ? Colors.red : Colors.blue,
+                  shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
-                    showCircle ? '選択問題' : '入力問題',
+                    showChoice ? '選択問題' : '入力問題',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 60,
+                      fontSize: 40,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -76,12 +83,12 @@ class _HomeScreenState extends State<FormatScreen> {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: _toggleShape,
-              child: const Text('切り替え'),
+              onPressed: _toggleFormat,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
               ),
+              child: const Text('切り替え'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

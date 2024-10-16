@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../choiceQuestions/choiceScreen.dart';
-import '../InputQuestions/InputScreen.dart';
-import '../format/formatScreen.dart';
+import '../format/FormatScreen.dart';
 import '../screens/scoring_screen.dart';
+import '../test/Sentence.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   int currentIndex = 0;
   final List<Map<String, dynamic>> items = [
-    {'color': Colors.orange, 'text': '問題集', 'screen': const FormatScreen()},
+    {'color': Colors.orange, 'text': '問題集', 'screen': const MathProblemGenerator()},
     {'color': Colors.purple, 'text': 'タイムアタック'},
     {'color': Colors.teal, 'text': '復習'},
     {'color': Colors.brown, 'text': '成績', 'screen': const ScoringScreen()},
@@ -26,6 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final screen = items[currentIndex]['screen'];
     if (screen != null) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('この項目には現在対応する画面がありません。')),
+      );
     }
   }
 
@@ -33,7 +36,11 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       currentIndex = (currentIndex + delta + items.length) % items.length;
     });
-    _pageController.animateToPage(currentIndex, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    _pageController.animateToPage(
+      currentIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -42,14 +49,18 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text("ホーム"),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => Scaffold.of(context).openDrawer(),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
         ],
       ),
@@ -63,7 +74,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ...items.map((item) => ListTile(
               title: Text(item['text']),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pop(context);
+                final screen = item['screen'];
+                if (screen != null) {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('この項目には現在対応する画面がありません。')),
+                  );
+                }
+              },
             )),
           ],
         ),
@@ -73,7 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(onPressed: () => _changeIndex(-1), child: const Text('<', style: TextStyle(fontSize: 32))),
+            TextButton(
+              onPressed: () => _changeIndex(-1),
+              child: const Text('<', style: TextStyle(fontSize: 32)),
+            ),
             const SizedBox(width: 20),
             SizedBox(
               width: 300,
@@ -84,11 +108,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   return Container(
-                    decoration: BoxDecoration(color: items[index]['color'], shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: items[index]['color'],
+                      shape: BoxShape.circle,
+                    ),
                     child: Center(
                       child: Text(
                         items[index]['text'],
-                        style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   );
@@ -96,14 +127,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            TextButton(onPressed: () => _changeIndex(1), child: const Text('>', style: TextStyle(fontSize: 32))),
+            TextButton(
+              onPressed: () => _changeIndex(1),
+              child: const Text('>', style: TextStyle(fontSize: 32)),
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToNextScreen,
-        child: const Icon(Icons.check),
         tooltip: '決定',
+        child: const Icon(Icons.check),
       ),
     );
   }
