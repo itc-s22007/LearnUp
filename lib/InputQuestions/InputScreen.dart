@@ -38,7 +38,6 @@ class _InputScreenState extends State<InputScreen> {
     if (isCorrect) {
       _showSuccessAnimation();
     }
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -131,7 +130,7 @@ class _InputScreenState extends State<InputScreen> {
             border: OutlineInputBorder(),
             labelText: '答えを入力してください',
           ),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: TextInputType.numberWithOptions(decimal: true),
           style: const TextStyle(fontSize: 20),
           readOnly: _isAnswered,
           onFieldSubmitted: (_) => !_isAnswered ? _checkAnswer() : null,
@@ -173,5 +172,3 @@ class _InputScreenState extends State<InputScreen> {
     );
   }
 }
-
-

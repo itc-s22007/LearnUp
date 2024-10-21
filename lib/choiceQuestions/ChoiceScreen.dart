@@ -15,7 +15,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
   int _currentQuestionIndex = 0;
   bool _isAnswered = false;
   bool _isCorrect = false;
-  List<double> _currentOptions = [];
+  List<int> _currentOptions = [];
 
   @override
   void initState() {
@@ -24,17 +24,16 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
   }
 
   void _generateOptions() {
-    final correctAnswer = widget.problems[_currentQuestionIndex].answer;
+    final correctAnswer = widget.problems[_currentQuestionIndex].answer.toInt();
     _currentOptions = _generateOptionsList(correctAnswer);
   }
 
-  List<double> _generateOptionsList(double correctAnswer) {
-    List<double> options = [correctAnswer];
+  List<int> _generateOptionsList(int correctAnswer) {
+    List<int> options = [correctAnswer];
     Random rand = Random();
 
     while (options.length < 4) {
-      double wrongAnswer = correctAnswer + rand.nextInt(10) - 5 + rand.nextDouble();
-      wrongAnswer = double.parse(wrongAnswer.toStringAsFixed(2));
+      int wrongAnswer = correctAnswer + rand.nextInt(10) - 5;
       if (wrongAnswer != correctAnswer && wrongAnswer > 0 && !options.contains(wrongAnswer)) {
         options.add(wrongAnswer);
       }
@@ -44,8 +43,8 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     return options;
   }
 
-  void _checkAnswer(double selectedAnswer) {
-    final correctAnswer = widget.problems[_currentQuestionIndex].answer;
+  void _checkAnswer(int selectedAnswer) {
+    final correctAnswer = widget.problems[_currentQuestionIndex].answer.toInt();
     bool isCorrect = selectedAnswer == correctAnswer;
 
     setState(() {
@@ -62,8 +61,8 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
       builder: (context) => AlertDialog(
         title: Text(isCorrect ? '正解！' : '不正解'),
         content: Text(isCorrect
-            ? 'おめでとうございます！正解です。'
-            : '残念、不正解です。正しい答えは$correctAnswerです。'),
+            ? 'せいかいです！'
+            : 'ざんねん、まちがいです。こたえは$correctAnswerです。'),
         actions: [
           TextButton(
             onPressed: () {
@@ -93,7 +92,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
           children: [
             Icon(Icons.check_circle, color: Colors.white),
             SizedBox(width: 10),
-            Text('正解！'),
+            Text('せいかい！'),
           ],
         ),
         backgroundColor: Colors.green,
@@ -102,7 +101,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     );
   }
 
-  // 全問終了時のダイアログ
   void _showCompletionDialog() {
     showDialog(
       context: context,
@@ -156,7 +154,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
                 Color buttonColor;
 
                 if (_isAnswered) {
-                  if (option == problem.answer) {
+                  if (option == problem.answer.toInt()) {
                     buttonColor = Colors.green;
                   } else {
                     buttonColor = Colors.red;
@@ -183,4 +181,3 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     );
   }
 }
-

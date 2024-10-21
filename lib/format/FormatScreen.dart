@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import '../InputQuestions/InputScreen.dart';
-import '../choiceQuestions/ChoiceScreen.dart';
-import '../models/problem.dart';
+import '../level/LevelScreen.dart';
 
 class FormatScreen extends StatefulWidget {
-  final List<Problem> problems;
-
-  const FormatScreen({super.key, required this.problems});
+  const FormatScreen({super.key, required List problems});
 
   @override
   State<FormatScreen> createState() => _FormatScreenState();
@@ -21,22 +17,13 @@ class _FormatScreenState extends State<FormatScreen> {
     });
   }
 
-  void _navigateToNextScreen() {
-    if (showChoice) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChoiceScreen(problems: widget.problems),
-        ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => InputScreen(problems: widget.problems),
-        ),
-      );
-    }
+  void _navigateToLevelScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LevelScreen(isChoice: showChoice),
+      ),
+    );
   }
 
   @override
@@ -92,7 +79,7 @@ class _FormatScreenState extends State<FormatScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _navigateToNextScreen,
+              onPressed: _navigateToLevelScreen,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
@@ -101,6 +88,12 @@ class _FormatScreenState extends State<FormatScreen> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+        },
+        tooltip: '追加アクション',
+        child: const Icon(Icons.add),
       ),
     );
   }
