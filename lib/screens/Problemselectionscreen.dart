@@ -20,7 +20,6 @@ class ProblemSelectionScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            // 計算問題ボタン
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -31,7 +30,6 @@ class ProblemSelectionScreen extends StatelessWidget {
               child: const Text('計算問題'),
             ),
             const SizedBox(height: 10),
-            // 文章問題ボタン
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -42,7 +40,6 @@ class ProblemSelectionScreen extends StatelessWidget {
               child: const Text('文章問題'),
             ),
             const SizedBox(height: 10),
-            // 図形問題ボタン
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -53,7 +50,6 @@ class ProblemSelectionScreen extends StatelessWidget {
               child: const Text('図形問題'),
             ),
             const SizedBox(height: 10),
-            // お金の計算ボタン
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -64,7 +60,6 @@ class ProblemSelectionScreen extends StatelessWidget {
               child: const Text('お金の計算'),
             ),
             const SizedBox(height: 10),
-            // 計算式穴埋めボタン
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -81,9 +76,8 @@ class ProblemSelectionScreen extends StatelessWidget {
   }
 }
 
-// MathProblemScreenクラスは選択した問題を表示するための画面
 class MathProblemScreen extends StatelessWidget {
-  final String type; // 問題の種類
+  final String type;
 
   const MathProblemScreen({super.key, required this.type});
 

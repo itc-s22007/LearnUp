@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../format/FormatScreen.dart';
-import '../screens/scoring_screen.dart';
+import '../screens/results_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,11 +12,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   int currentIndex = 0;
+
   final List<Map<String, dynamic>> items = [
     {'color': Colors.orange, 'text': '問題集', 'screen': const FormatScreen(problems: [],)},
     {'color': Colors.purple, 'text': 'タイムアタック'},
     {'color': Colors.teal, 'text': '復習'},
-    {'color': Colors.brown, 'text': '成績', 'screen': const ScoringScreen()},
+    {'color': Colors.brown, 'text': '成績', 'screen': const ResultsScreen(totalQuestions: 10, correctAnswers: 0, questionResults: [],)},
     {'color': Colors.pink, 'text': '報酬'},
   ];
 
@@ -74,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ...items.map((item) => ListTile(
               title: Text(item['text']),
               onTap: () {
-                Navigator.pop(context); // ドロワーを閉じる
+                Navigator.pop(context);
                 final screen = item['screen'];
                 if (screen != null) {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
@@ -141,3 +142,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+
