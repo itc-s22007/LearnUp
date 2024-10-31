@@ -1,51 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:learnup/unit/school%20year/1st/SentencePlus.dart';
 import 'dart:math';
-import '../../../choiceQuestions/ChoiceScreen.dart';
 import '../../../models/problem.dart';
+import '../../../format/element/ChoiceScreen.dart';
 
 class SentenceMinus extends StatefulWidget {
-  const SentenceMinus({super.key, required String format});
+  final String format;
+  const SentenceMinus({Key? key, required this.format}) : super(key: key);
 
   @override
-  State<SentenceMinus> createState() => _Calculations1State();
-}
+  State<SentenceMinus> createState() => _SentenceMinusState();
 
-class _Calculations1State extends State<SentenceMinus> {
-  List<Problem> _problems = [];
-  bool _isGenerating = true;
+  static List<Problem> generateProblems() {
+    final List<String> templates = [
+      '{name}は{a}このリンゴをもっています。おかあさんが{b}このリンゴをもっていきました。いま{name}はリンゴをいくつもっていますか？',
+      '{name}は{a}ほんのえんぴつをもっています。ともだちに{b}ほんのえんぴつをあげました。いまえんぴつはなんぼんありますか？',
+      'クラスにはじめに{a}にんのこどもがいます。{b}にんのこどもがクラスをでました。いま、クラスにはなんにんいますか？',
+      '{name}は{a}ページのほんをよみました。そのあと{b}ページをかえしました。いま、なんページのほんをもっていますか？',
+      '{name}のはこに{a}このキャンディがあります。ともだちに{b}このキャンディをあげました。いま、キャンディはいくつありますか？',
+      '{name}はおかしを{a}こもっています。ともだちに{b}こあげました。いま、おかしはいくつありますか？',
+      'さくひんてんに、さいしょに{a}このえがかざってあります。{b}このえがはずされました。いま、えはなんこかざられていますか？',
+      '{name}はほんだなに{a}さつのほんをおいています。おとうさんが{b}さつのほんをもっていきました。いま、ほんだなにはなんさつのほんがありますか？',
+      'つくえのうえに{a}このえんぴつけずりがあります。ともだちが{b}このえんぴつけずりをもっていきました。つくえのうえにはなんこありますか？',
+      '{name}はけいとを{a}まきもっています。ばあばに{b}まきあげました。いま、けいとはなんまきありますか？'
+    ];
 
-  final List<String> templates = [
-    '{name}は{a}このリンゴをもっています。おかあさんが{b}このリンゴをもっていきました。いま{name}はリンゴをいくつもっていますか？',
-    '{name}は{a}ほんのえんぴつをもっています。ともだちに{b}ほんのえんぴつをあげました。いまえんぴつはなんぼんありますか？',
-    'クラスにはじめに{a}にんのこどもがいます。{b}にんのこどもがクラスをでました。いま、クラスにはなんにんいますか？',
-    '{name}は{a}ページのほんをよみました。そのあと{b}ページをかえしました。いま、なんページのほんをもっていますか？',
-    '{name}のはこに{a}このキャンディがあります。ともだちに{b}このキャンディをあげました。いま、キャンディはいくつありますか？',
-    '{name}はおかしを{a}こもっています。ともだちに{b}こあげました。いま、おかしはいくつありますか？',
-    'さくひんてんに、さいしょに{a}このえがかざってあります。{b}このえがはずされました。いま、えはなんこかざられていますか？',
-    '{name}はほんだなに{a}さつのほんをおいています。おとうさんが{b}さつのほんをもっていきました。いま、ほんだなにはなんさつのほんがありますか？',
-    'つくえのうえに{a}このえんぴつけずりがあります。ともだちが{b}このえんぴつけずりをもっていきました。つくえのうえにはなんこありますか？',
-    '{name}はけいとを{a}まきもっています。ばあばに{b}まきあげました。いま、けいとはなんまきありますか？'
-  ];
-
-  final List<String> names = ['ぎんじ', 'かに', 'りおん', 'ショーン', '上盛いしき'];
-
-  @override
-  void initState() {
-    super.initState();
-    _generateProblems();
-  }
-
-  void _generateProblems() async {
-    await Future.delayed(const Duration(seconds: 1));
-
+    final List<String> names = ['ぎんじ', 'かに', 'りおん', 'ショーン', '上盛いしき','nyannyannyan','寺本凛'];
     List<Problem> generatedProblems = [];
 
     for (int i = 0; i < 10; i++) {
       final template = templates[Random().nextInt(templates.length)];
       final name = names[Random().nextInt(names.length)];
       final a = Random().nextInt(20) + 1;
-      final b = Random().nextInt(20) + 1;
+      final b = Random().nextInt(a) + 1;
 
       String question = template
           .replaceAll('{name}', name)
@@ -57,32 +43,45 @@ class _Calculations1State extends State<SentenceMinus> {
       generatedProblems.add(Problem(question: question, answer: answer));
     }
 
-    setState(() {
-      _problems = generatedProblems;
-      _isGenerating = false;
-    });
+    return generatedProblems;
+  }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChoiceScreen(problems: _problems),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('ひきざんのおはなしもんだい'),
+        centerTitle: true,
       ),
+      body: const Center(child: Text('問題を表示するUIをここに追加')),
     );
+  }
+}
+
+class _SentenceMinusState extends State<SentenceMinus> {
+  List<Problem> _problems = [];
+  @override
+  void initState() {
+    super.initState();
+    _problems = SentenceMinus.generateProblems();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculations 1st Grade (Subtraction)'),
+        title: const Text('ひきざんのおはなしもんだい'),
         centerTitle: true,
       ),
-      body: Center(
-        child: _isGenerating
-            ? const CircularProgressIndicator()
-            : const Text('問題を生成中...'),
+      body: _problems.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+        itemCount: _problems.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(_problems[index].question),
+          );
+        },
       ),
     );
   }
 }
-

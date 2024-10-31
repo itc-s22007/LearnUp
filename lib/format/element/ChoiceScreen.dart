@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
-import '../models/problem.dart';
+import 'package:learnup/unit/Unit.dart';
+import '../../models/problem.dart';
 import 'dart:math';
+import '../../screens/results_screen.dart';
 
 class ChoiceScreen extends StatefulWidget {
+  final void Function(Problem, double) onAnswerSelected;
+  final Unit? unit;
   final List<Problem> problems;
 
-  const ChoiceScreen({Key? key, required this.problems}) : super(key: key);
+  const ChoiceScreen({
+    Key? key,
+    required this.problems,
+    required this.onAnswerSelected,
+    this.unit, required void Function(Problem problem, double userAnswer) onAnswerEntered,
+  }) : super(key: key);
 
   @override
   State<ChoiceScreen> createState() => _ChoiceScreenState();
@@ -13,6 +22,7 @@ class ChoiceScreen extends StatefulWidget {
 
 class _ChoiceScreenState extends State<ChoiceScreen> {
   int _currentQuestionIndex = 0;
+  int _correctAnswersCount = 0;
   bool _isAnswered = false;
   bool _isCorrect = false;
   List<int> _currentOptions = [];
@@ -50,14 +60,16 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     setState(() {
       _isAnswered = true;
       _isCorrect = isCorrect;
+      if (isCorrect) _correctAnswersCount++;
     });
 
-    if (isCorrect) {
-      _showSuccessAnimation();
-    }
+    widget.onAnswerSelected(widget.problems[_currentQuestionIndex], selectedAnswer.toDouble());
+
+    if (isCorrect) _showSuccessAnimation();
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text(isCorrect ? '正解！' : '不正解'),
         content: Text(isCorrect
@@ -102,20 +114,14 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
   }
 
   void _showCompletionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('終了'),
-        content: const Text('すべての問題を終えました！'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text('ホームに戻る'),
-          ),
-        ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsScreen(
+          totalQuestions: widget.problems.length,
+          correctAnswers: _correctAnswersCount,
+          questionResults: [],
+        ),
       ),
     );
   }
