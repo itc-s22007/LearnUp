@@ -1,100 +1,64 @@
 import 'package:flutter/material.dart';
-import '../level/LevelScreen.dart';
+import 'element/ChoiceScreen.dart';
+import 'element/InputScreen.dart';
+import '../unit/Unit.dart';
+import '../models/problem.dart';
 
-class FormatScreen extends StatefulWidget {
-  const FormatScreen({super.key, required List problems});
+class FormatScreen extends StatelessWidget {
+  final Unit unit;
+  final List<Problem> problems;
 
-  @override
-  State<FormatScreen> createState() => _FormatScreenState();
-}
-
-class _FormatScreenState extends State<FormatScreen> {
-  bool showChoice = true;
-
-  void _toggleFormat() {
-    setState(() {
-      showChoice = !showChoice;
-    });
-  }
-
-  void _navigateToLevelScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LevelScreen(isChoice: showChoice),
-      ),
-    );
-  }
+  const FormatScreen({Key? key, required this.unit, required this.problems}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('形式選択'),
+        title: const Text('問題形式を選んでください'),
         centerTitle: true,
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (child, animation) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 1),
-                    end: const Offset(0, 0),
-                  ).animate(animation),
-                  child: child,
-                );
-              },
-              child: Container(
-                key: ValueKey<bool>(showChoice),
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  color: showChoice ? Colors.red : Colors.blue,
-                  shape: BoxShape.circle,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildFormatButton(context, '選択問題', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChoiceScreen(problems: problems, onAnswerSelected: (problem, score) {}, onAnswerEntered: (Problem problem, double userAnswer) {  },),
                 ),
-                child: Center(
-                  child: Text(
-                    showChoice ? '選択問題' : '入力問題',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                    ),
+              );
+            }),
+            const SizedBox(height: 20),
+            _buildFormatButton(context, '入力問題', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InputScreen(
+                    problems: problems,
+                    onAnswerEntered: (Problem problem, String userFormula, double userAnswer) {
+                      print('User entered formula: $userFormula with answer: $userAnswer for problem: ${problem.question}');
+                    },
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _toggleFormat,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
-              ),
-              child: const Text('切り替え'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _navigateToLevelScreen,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
-              ),
-              child: const Text('決定'),
-            ),
+              );
+            }),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-        },
-        tooltip: '追加アクション',
-        child: const Icon(Icons.add),
+    );
+  }
+
+  Widget _buildFormatButton(BuildContext context, String title, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(title),
       ),
     );
   }
 }
+
+

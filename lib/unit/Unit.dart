@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:learnup/unit/school%20year/1st/SentenceMinus.dart';
-import 'package:learnup/unit/school%20year/1st/SentencePlus.dart';
-
-import 'school year/1st/Plus.dart';
+import 'school year/1st/BlankMinus.dart';
 import 'school year/1st/Minus.dart';
-import 'school year/1st/Measrements1.dart';
+import 'school year/1st/Plus.dart';
+import 'school year/1st/SentencePlus.dart';
+import 'school year/1st/SentenceMinus.dart';
+import '../format/FormatScreen.dart';
+import '../models/problem.dart';
+import 'school year/1st/BlankPlus.dart';
 
 class UnitScreen extends StatelessWidget {
   final String grade;
+  final int currentIndex = 0;
 
   const UnitScreen({Key? key, required this.grade}) : super(key: key);
 
@@ -20,24 +23,62 @@ class UnitScreen extends StatelessWidget {
         title: Text('$grade 単元'),
         centerTitle: true,
       ),
-      body: ListView.builder(
-        itemCount: units.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(
-              units[index].title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            trailing: const Icon(Icons.arrow_forward),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => units[index].widget),
-              );
-            },
-          );
-        },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade200, Colors.blue.shade600],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: units.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+          itemCount: units.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: Card(
+                color: Colors.white.withOpacity(0.8),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ListTile(
+                  title: Text(
+                    units[index].title,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FormatScreen(
+                          unit: units[index],
+                          problems: units[index].problems,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        tooltip: '',
+        child: const Icon(Icons.article),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 7.0,
+        color: Theme.of(context).primaryColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        ),
       ),
     );
   }
@@ -46,31 +87,12 @@ class UnitScreen extends StatelessWidget {
     switch (grade) {
       case '1年生':
         return [
-          Unit(title: 'たしざん', widget: const Calculations1(format: '',)),
-          Unit(title: 'ひきざん', widget: const Calculations2(format: '',)),
-          Unit(title: 'たしざんのおはなしもんだい', widget: const SentencePlus(format: '')),
-          Unit(title: 'ひきざんのおはなしもんだい', widget: const SentenceMinus(format: '')),
-          Unit(title: 'ながさのもんだい', widget: Measurements1())
-        ];
-      case '2年生':
-        return [
-
-        ];
-      case '3年生':
-        return [
-
-        ];
-      case '4年生':
-        return [
-
-        ];
-      case '5年生':
-        return [
-
-        ];
-      case '6年生':
-        return [
-
+          Unit(title: 'たしざんのけいさん', widget: const Calculations1(format: ''), problems: Calculations1.generateProblems()),
+          Unit(title: 'たしざんのあなうめ', widget: const BlankPlus(format: ''), problems: BlankPlus.generateProblems()),
+          Unit(title: 'たしざんのおはなしもんだい', widget: const SentencePlus(format: ''), problems: SentencePlus.generateProblems()),
+          Unit(title: 'ひきざんのけいさん', widget: const Calculations2(format: ''), problems: []),
+          Unit(title: 'ひきざんのあなうめ', widget: const BlankMinus(format: ''), problems: BlankMinus.generateProblems()),
+          Unit(title: 'ひきざんのおはなしもんだい', widget: const SentenceMinus(format: ''), problems: SentenceMinus.generateProblems()),
         ];
       default:
         return [];
@@ -81,60 +103,8 @@ class UnitScreen extends StatelessWidget {
 class Unit {
   final String title;
   final Widget widget;
+  final List<Problem> problems;
 
-  Unit({required this.title, required this.widget});
+  Unit({required this.title, required this.widget, required this.problems});
 }
-
-
-//       case '1年生':
-//         return [
-//           Unit(title: '計算', widget: const Calculations1()),
-//           // Unit(title: '測定', widget: const Measurements1()),
-//           // Unit(title: '図形', widget: const Shapes1()),
-//           // Unit(title: '時間', widget: const Times1()),
-//         ];
-//       case '2年生':
-//         return [
-//           // Unit(title: '計算', widget: const Calculations2()),
-//           // Unit(title: '測定', widget: const Measurements2()),
-//           // Unit(title: 'お金', widget: const Money2()),
-//           // Unit(title: '図形', widget: const Shapes2()),
-//           // Unit(title: '時間', widget: const Times2()),
-//         ];
-//       case '3年生':
-//         return [
-//           // Unit(title: '計算', widget: const Calculations3()),
-//           // Unit(title: 'データ', widget: const Data3()),
-//           // Unit(title: '', widget: const Decimal3()),
-//           // Unit(title: '', widget: const Fractions3()),
-//           // Unit(title: '測定', widget: const Measurements3()),
-//           // Unit(title: '図形', widget: const Shapes3()),
-//         ];
-//       case '4年生':
-//         return [
-//           // Unit(title: '計算', widget: const Calculations4()),
-//           // Unit(title: 'データ', widget: const Data4()),
-//           // Unit(title: '測定', widget: const Measurements4()),
-//           // Unit(title: '', widget: const Proportions4()),
-//           // Unit(title: '図形', widget: const Shapes4()),
-//         ];
-//       case '5年生':
-//         return [
-//           // Unit(title: '計算', widget: const Calculations5()),
-//           // Unit(title: 'データ', widget: const Data5()),
-//           // Unit(title: '', widget: const Equations5()),
-//           // Unit(title: '', widget: const Proportions5()),
-//           // Unit(title: '図形', widget: const Shapes5()),
-//         ];
-//       case '6年生':
-//         return [
-//           // Unit(title: '計算', widget: const Calculations6()),
-//           // Unit(title: '', widget: const Equations6()),
-//           // Unit(title: '', widget: const Probability6()),
-//           // Unit(title: '', widget: const Proportions6()),
-//           // Unit(title: '図形', widget: const Shapes6()),
-//           // Unit(title: '', widget: const Solution6()),
-//         ];
-
-
 

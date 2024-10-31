@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-import '../models/problem.dart';
+import '../../models/problem.dart';
+import '../../screens/results_screen.dart';
 
 class InputScreen extends StatefulWidget {
   final List<Problem> problems;
+  final Function(Problem problem, String userFormula, double userAnswer) onAnswerEntered;
 
-  const InputScreen({Key? key, required this.problems}) : super(key: key);
+  const InputScreen({
+    Key? key,
+    required this.problems,
+    required this.onAnswerEntered,
+  }) : super(key: key);
 
   @override
   State<InputScreen> createState() => _InputScreenState();
@@ -14,10 +20,13 @@ class _InputScreenState extends State<InputScreen> {
   int _currentQuestionIndex = 0;
   bool _isAnswered = false;
   bool _isCorrect = false;
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _formulaController = TextEditingController();
+  final TextEditingController _answerController = TextEditingController();
+  int _correctAnswersCount = 0;
 
   void _checkAnswer() {
-    final userInput = _controller.text;
+    final userFormula = _formulaController.text;
+    final userInput = _answerController.text;
     final userAnswer = double.tryParse(userInput);
     final correctAnswer = widget.problems[_currentQuestionIndex].answer;
 
@@ -33,11 +42,13 @@ class _InputScreenState extends State<InputScreen> {
     setState(() {
       _isAnswered = true;
       _isCorrect = isCorrect;
+      if (isCorrect) _correctAnswersCount++;
     });
 
-    if (isCorrect) {
-      _showSuccessAnimation();
-    }
+    widget.onAnswerEntered(widget.problems[_currentQuestionIndex], userFormula, userAnswer);
+
+    if (isCorrect) _showSuccessAnimation();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -54,7 +65,8 @@ class _InputScreenState extends State<InputScreen> {
                   _currentQuestionIndex++;
                   _isAnswered = false;
                   _isCorrect = false;
-                  _controller.clear();
+                  _formulaController.clear();
+                  _answerController.clear();
                 });
               } else {
                 _showCompletionDialog();
@@ -67,44 +79,23 @@ class _InputScreenState extends State<InputScreen> {
     );
   }
 
-  void _showSuccessAnimation() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 10),
-            Text('正解！'),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 1),
-      ),
-    );
-  }
-
   void _showCompletionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('終了'),
-        content: const Text('すべての問題を終えました！'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text('ホームに戻る'),
-          ),
-        ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsScreen(
+          totalQuestions: widget.problems.length,
+          correctAnswers: _correctAnswersCount,
+          questionResults: const [],
+        ),
       ),
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _formulaController.dispose();
+    _answerController.dispose();
     super.dispose();
   }
 
@@ -125,12 +116,23 @@ class _InputScreenState extends State<InputScreen> {
         ),
         const SizedBox(height: 30),
         TextFormField(
-          controller: _controller,
+          controller: _formulaController,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: '計算式を入力してください',
+          ),
+          keyboardType: TextInputType.text,
+          style: const TextStyle(fontSize: 20),
+          readOnly: _isAnswered,
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: _answerController,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: '答えを入力してください',
           ),
-          keyboardType: TextInputType.numberWithOptions(decimal: true),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           style: const TextStyle(fontSize: 20),
           readOnly: _isAnswered,
           onFieldSubmitted: (_) => !_isAnswered ? _checkAnswer() : null,
@@ -155,6 +157,22 @@ class _InputScreenState extends State<InputScreen> {
             ],
           ),
       ],
+    );
+  }
+
+  void _showSuccessAnimation() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 10),
+            Text('正解！'),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 1),
+      ),
     );
   }
 

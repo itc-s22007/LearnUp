@@ -1,47 +1,24 @@
 import 'package:flutter/material.dart';
-import '../format/FormatScreen.dart';
-import '../screens/results_screen.dart';
+
+import '../home/Profile.dart';
+import 'LevelScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _AllLevelScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final PageController _pageController = PageController();
+class _AllLevelScreenState extends State<HomeScreen> {
   int currentIndex = 0;
 
   final List<Map<String, dynamic>> items = [
-    {'color': Colors.orange, 'text': '問題集', 'screen': const FormatScreen(problems: [],)},
+    {'color': Colors.orange, 'text': '問題集'},
     {'color': Colors.purple, 'text': 'タイムアタック'},
+    {'color': Colors.green, 'text': '全画面'},
     {'color': Colors.teal, 'text': '復習'},
-    {'color': Colors.brown, 'text': '成績', 'screen': const ResultsScreen(totalQuestions: 10, correctAnswers: 0, questionResults: [],)},
-    {'color': Colors.pink, 'text': '報酬'},
   ];
-
-  void _navigateToNextScreen() {
-    final screen = items[currentIndex]['screen'];
-    if (screen != null) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('この項目には現在対応する画面がありません。')),
-      );
-    }
-  }
-
-  void _changeIndex(int delta) {
-    setState(() {
-      currentIndex = (currentIndex + delta + items.length) % items.length;
-    });
-    _pageController.animateToPage(
-      currentIndex,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,80 +41,112 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text('メニュー', style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ...items.map((item) => ListTile(
-              title: Text(item['text']),
-              onTap: () {
-                Navigator.pop(context);
-                final screen = item['screen'];
-                if (screen != null) {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('この項目には現在対応する画面がありません。')),
-                  );
-                }
-              },
-            )),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade200, Colors.blue.shade600],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-      body: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              onPressed: () => _changeIndex(-1),
-              child: const Text('<', style: TextStyle(fontSize: 32)),
-            ),
-            const SizedBox(width: 20),
-            SizedBox(
-              width: 300,
-              height: 200,
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) => setState(() => currentIndex = index),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: items[index]['color'],
-                      shape: BoxShape.circle,
+        child: Center(
+          child: currentIndex == 0
+              ? LevelScreen(isChoice: null, onLevelSelected: (selectedLevel) {  },)
+              : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
                     ),
-                    child: Center(
-                      child: Text(
-                        items[index]['text'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                  ],
+                ),
+                child: Text(
+                  items[currentIndex]['text'],
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            TextButton(
-              onPressed: () => _changeIndex(1),
-              child: const Text('>', style: TextStyle(fontSize: 32)),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToNextScreen,
-        tooltip: '決定',
-        child: const Icon(Icons.check),
+        onPressed: () {
+
+        },
+        tooltip: '',
+        child: const Icon(Icons.article),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 7.0,
+        color: Theme.of(context).primaryColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.book),
+                color: Colors.white,
+                onPressed: () {
+                  setState(() {
+                    currentIndex = 0;
+                  });
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.timer),
+                color: Colors.white,
+                onPressed: () {
+                  setState(() {
+                    currentIndex = 1;
+                  });
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.home),
+                color: Colors.white,
+                onPressed: () {
+                  setState(() {
+                    currentIndex = 2;
+                  });
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                color: Colors.white,
+                onPressed: () {
+                  setState(() {
+                    currentIndex = 3;
+                  });
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.person_outline),
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

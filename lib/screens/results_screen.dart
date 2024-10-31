@@ -1,11 +1,9 @@
-//lib/screens/results_screen.dart
-
 import 'package:flutter/material.dart';
 
 class ResultsScreen extends StatelessWidget {
-  final int totalQuestions; // 総問題数
-  final int correctAnswers;  // 正解数
-  final List<String> questionResults; // 各問題の結果
+  final int totalQuestions;
+  final int correctAnswers;
+  final List<String> questionResults;
 
   const ResultsScreen({
     super.key,
@@ -13,7 +11,6 @@ class ResultsScreen extends StatelessWidget {
     required this.correctAnswers,
     required this.questionResults,
   });
-
 
   @override
   Widget build(BuildContext context) {

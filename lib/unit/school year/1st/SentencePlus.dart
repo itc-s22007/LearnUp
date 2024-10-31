@@ -1,44 +1,23 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../../../choiceQuestions/ChoiceScreen.dart';
+import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
+import '../../../format/element/InputScreen.dart';
 
 class SentencePlus extends StatefulWidget {
-  const SentencePlus({Key? key, required String format}) : super(key: key);
+  final String format;
+  const SentencePlus({Key? key, required this.format}) : super(key: key);
 
   @override
-  State<SentencePlus> createState() => _Calculations1State();
-}
+  State<SentencePlus> createState() => _SentencePlusState();
 
-class _Calculations1State extends State<SentencePlus> {
-  List<Problem> _problems = [];
-  bool _isGenerating = true;
+  static List<Problem> generateProblems() {
+    final List<String> templates = [
+      '{name}は{a}このリンゴをもっています。おかあさんが{b}このリンゴをくれました。いま{name}はリンゴをいくつもっていますか？',
+      '{name}は{a}ほんのえんぴつをもっています。ともだちが{b}ほんのえんぴつをくれました。いまえんぴつはなんぼんありますか？',
+    ];
 
-  final List<String> templates = [
-    '{name}は{a}このリンゴをもっています。おかあさんが{b}このリンゴをくれました。いま{name}はリンゴをいくつもっていますか？',
-    '{name}は{a}ほんのえんぴつをもっています。ともだちが{b}ほんのえんぴつをくれました。いまえんぴつはなんぼんありますか？',
-    'クラスにはじめに{a}にんのこどもがいます。あたらしく{b}にんのこどもがクラスにきました。いま、クラスにはなんにんいますか？',
-    '{name}は{a}ページのほんをよみました。つぎの日に{b}ページよみました。ぜんぶでなんページよみましたか？',
-    '{name}のはこに{a}このキャンディがあります。ともだちからさらに{b}このキャンディをもらいました。いま、キャンディはいくつありますか？',
-    '{name}はおかしを{a}こもっています。ともだちに{b}こもらいました。いま、おかしはいくつありますか？',
-    'さくひんてんに、さいしょに{a}このえがかざってあります。さらに{b}このえがかざられました。いま、えはなんこかざられていますか？',
-    '{name}はほんだなに{a}さつのほんをおいています。おとうさんが{b}さつのほんをあたえました。ぜんぶでほんはなんさつありますか？',
-    'つくえのうえに{a}このえんぴつけずりがあります。おかあさんが{b}このえんぴつけずりをもってきました。つくえのうえにはなんこありますか？',
-    '{name}はけいとを{a}まきもっています。ばあばがさらに{b}まきあげました。いま、けいとはなんまきありますか？'
-  ];
-
-
-  final List<String> names = ['ぎんじ', 'かに', 'りおん', 'ショーン', '上盛いしき'];
-
-  @override
-  void initState() {
-    super.initState();
-    _generateProblems();
-  }
-
-  void _generateProblems() async {
-    await Future.delayed(const Duration(seconds: 1));
-
+    final List<String> names = ['ぎんじ', 'かに', 'りおん', 'ショーン', '上盛いしき','nyannyannyan','寺本凛'];
     List<Problem> generatedProblems = [];
 
     for (int i = 0; i < 10; i++) {
@@ -57,30 +36,73 @@ class _Calculations1State extends State<SentencePlus> {
       generatedProblems.add(Problem(question: question, answer: answer));
     }
 
-    setState(() {
-      _problems = generatedProblems;
-      _isGenerating = false;
-    });
+    return generatedProblems;
+  }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChoiceScreen(problems: _problems),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('たしざんのおはなしもんだい'),
+        centerTitle: true,
       ),
+      body: const Center(child: Text('問題を表示するUIをここに追加')),
     );
+  }
+}
+
+class _SentencePlusState extends State<SentencePlus> {
+  List<Problem> _problems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _problems = SentencePlus.generateProblems();
+  }
+
+  void _handleChoiceAnswer(Problem problem, double userAnswer) {
+  }
+
+  void _handleInputAnswer(Problem problem, String userFormula, double userAnswer) {
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculations 1st Grade'),
+        title: const Text('たしざんのおはなしもんだい'),
         centerTitle: true,
       ),
-      body: Center(
-        child: _isGenerating
-            ? const CircularProgressIndicator()
-            : const Text('問題を生成中...'),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChoiceScreen(
+                    problems: _problems,
+                    onAnswerEntered: _handleChoiceAnswer, onAnswerSelected: (Problem , double ) {  },
+                  ),
+                ),
+              );
+            },
+            child: const Text('選択問題へ'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InputScreen(
+                    problems: _problems,
+                    onAnswerEntered: _handleInputAnswer,
+                  ),
+                ),
+              );
+            },
+            child: const Text('入力問題へ'),
+          ),
+        ],
       ),
     );
   }

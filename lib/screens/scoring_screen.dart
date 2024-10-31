@@ -5,7 +5,7 @@ class ScoringScreen extends StatelessWidget {
   final int correctAnswers;
 
   const ScoringScreen({
-    super.key, // ここを修正
+    super.key,
     this.totalQuestions = 0,
     this.correctAnswers = 0,
   });
@@ -59,8 +59,8 @@ class ScoringScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('${index + 1}.'),
-                      const Text('○○○○○'), // 正答（例）
-                      const Text('×××××'), // 解答（例）
+                      const Text('○○○○○'),
+                      const Text('×××××'),
                     ],
                   );
                 },
