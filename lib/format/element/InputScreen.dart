@@ -119,7 +119,7 @@ class _InputScreenState extends State<InputScreen> {
           controller: _formulaController,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            labelText: '計算式を入力してください',
+            labelText: '式',
           ),
           keyboardType: TextInputType.text,
           style: const TextStyle(fontSize: 20),
