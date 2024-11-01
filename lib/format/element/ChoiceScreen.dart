@@ -26,6 +26,8 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
   bool _isAnswered = false;
   bool _isCorrect = false;
   List<int> _currentOptions = [];
+  List<String> _answerResults = [];
+
 
   @override
   void initState() {
@@ -54,8 +56,9 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
   }
 
   void _checkAnswer(int selectedAnswer) {
-    final correctAnswer = widget.problems[_currentQuestionIndex].answer.toInt();
-    bool isCorrect = selectedAnswer == correctAnswer;
+    final problem = widget.problems[_currentQuestionIndex];
+    final correctAnswer = problem.answer.toInt();
+    final isCorrect = selectedAnswer == correctAnswer;
 
     setState(() {
       _isAnswered = true;
@@ -63,7 +66,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
       if (isCorrect) _correctAnswersCount++;
     });
 
-    widget.onAnswerSelected(widget.problems[_currentQuestionIndex], selectedAnswer.toDouble());
+    widget.onAnswerSelected(problem, selectedAnswer.toDouble());
 
     if (isCorrect) _showSuccessAnimation();
 
@@ -95,6 +98,9 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
         ],
       ),
     );
+
+    final result = isCorrect ? '○' : '×';
+    _answerResults.add('$result: ${problem.question}: $correctAnswer: $selectedAnswer');
   }
 
   void _showSuccessAnimation() {
@@ -120,7 +126,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
         builder: (context) => ResultsScreen(
           totalQuestions: widget.problems.length,
           correctAnswers: _correctAnswersCount,
-          questionResults: [],
+          questionResults: _answerResults,
         ),
       ),
     );
@@ -187,3 +193,5 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     );
   }
 }
+
+
