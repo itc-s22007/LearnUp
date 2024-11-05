@@ -24,7 +24,7 @@ class SentenceMinus extends StatefulWidget {
       '{name}はけいとを{a}まきもっています。ばあばに{b}まきあげました。いま、けいとはなんまきありますか？'
     ];
 
-    final List<String> names = ['ぎんじ', 'かに', 'りおん', 'ショーン', '上盛いしき','nyannyannyan','寺本凛'];
+    final List<String> names = ['ぎんじ', 'かに', 'りおん', '上盛いしき'];
     List<Problem> generatedProblems = [];
 
     for (int i = 0; i < 10; i++) {

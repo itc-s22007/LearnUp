@@ -28,7 +28,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
   List<int> _currentOptions = [];
   List<String> _answerResults = [];
 
-
   @override
   void initState() {
     super.initState();
@@ -68,7 +67,9 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
 
     widget.onAnswerSelected(problem, selectedAnswer.toDouble());
 
-    if (isCorrect) _showSuccessAnimation();
+    _answerResults.add(
+        '${isCorrect ? "○" : "×"}: ${problem.question} : $correctAnswer : $selectedAnswer');
+
 
     showDialog(
       context: context,
@@ -96,25 +97,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
             child: const Text('次へ'),
           ),
         ],
-      ),
-    );
-
-    final result = isCorrect ? '○' : '×';
-    _answerResults.add('$result: ${problem.question}: $correctAnswer: $selectedAnswer');
-  }
-
-  void _showSuccessAnimation() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 10),
-            Text('せいかい！'),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 1),
       ),
     );
   }
@@ -193,5 +175,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     );
   }
 }
+
 
 
