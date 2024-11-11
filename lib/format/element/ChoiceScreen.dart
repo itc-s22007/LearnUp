@@ -70,7 +70,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     _answerResults.add(
         '${isCorrect ? "○" : "×"}: ${problem.question} : $correctAnswer : $selectedAnswer');
 
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -109,39 +108,65 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
           totalQuestions: widget.problems.length,
           correctAnswers: _correctAnswersCount,
           questionResults: _answerResults,
+          onRetry: _retryQuiz,
         ),
       ),
     );
   }
+
+  void _retryQuiz() {
+    setState(() {
+      _currentQuestionIndex = 0;
+      _correctAnswersCount = 0;
+      _isAnswered = false;
+      _isCorrect = false;
+      _answerResults.clear();
+      _generateOptions();
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
     final problem = widget.problems[_currentQuestionIndex];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('選択問題 (${_currentQuestionIndex + 1}/${widget.problems.length})'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              problem.question,
-              style: const TextStyle(fontSize: 20),
-              textAlign: TextAlign.center,
+
+      body: Column(
+        children: [
+
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              color: Colors.green,
+              padding: const EdgeInsets.all(16.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      problem.question,
+                      style: const TextStyle(fontSize: 20, color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 30),
-            GridView.builder(
+          ),
+          Container(
+            color: Colors.brown,
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+            child: GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _currentOptions.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: 15.0,
-                crossAxisSpacing: 15.0,
-                childAspectRatio: 3,
+                mainAxisSpacing: 5.0,
+                crossAxisSpacing: 10.0,
+                childAspectRatio: 5.0,
               ),
               itemBuilder: (context, index) {
                 final option = _currentOptions[index];
@@ -161,20 +186,21 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
                   onPressed: _isAnswered ? null : () => _checkAnswer(option),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
+                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 6.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                   child: Text(
                     option.toString(),
-                    style: const TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 18),
                   ),
                 );
               },
             ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }
 }
-
-
-

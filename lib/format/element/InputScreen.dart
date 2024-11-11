@@ -86,7 +86,7 @@ class _InputScreenState extends State<InputScreen> {
         builder: (context) => ResultsScreen(
           totalQuestions: widget.problems.length,
           correctAnswers: _correctAnswersCount,
-          questionResults: const [],
+          questionResults: const [], onRetry: () {  },
         ),
       ),
     );
