@@ -9,7 +9,6 @@ class Calculations1 extends StatefulWidget {
 
   @override
   State<Calculations1> createState() => _Calculations1State();
-
   static List<Problem> generateProblems() {
     List<Problem> problems = [];
     for (int i = 0; i < 10; i++) {
@@ -78,7 +77,7 @@ class _Calculations1State extends State<Calculations1> {
           builder: (context) => ResultsScreen(
             correctAnswers: _correctAnswers,
             totalQuestions: _problems.length,
-            questionResults: [],
+            questionResults: [], onRetry: () {  },
           ),
         ),
       );

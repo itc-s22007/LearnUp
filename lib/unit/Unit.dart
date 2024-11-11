@@ -1,98 +1,133 @@
 import 'package:flutter/material.dart';
-import 'school year/1st/BlankMinus.dart';
-import 'school year/1st/Minus.dart';
-import 'school year/1st/Plus.dart';
-import 'school year/1st/SentencePlus.dart';
-import 'school year/1st/SentenceMinus.dart';
-import '../format/FormatScreen.dart';
+import 'package:learnup/unit/school%20year/1st/BlankMinus.dart';
+import 'package:learnup/unit/school%20year/1st/BlankPlus.dart';
+import 'package:learnup/unit/school%20year/1st/Minus.dart';
+import 'package:learnup/unit/school%20year/1st/Plus.dart';
+import 'package:learnup/unit/school%20year/1st/SentenceMinus.dart';
+import 'package:learnup/unit/school%20year/1st/SentencePlus.dart';
+import 'package:learnup/unit/school%20year/1st/Times1.dart';
 import '../models/problem.dart';
-import 'school year/1st/BlankPlus.dart';
+import '../format/FormatScreen.dart';
 
 class UnitScreen extends StatelessWidget {
   final String grade;
-  final int currentIndex = 0;
 
   const UnitScreen({Key? key, required this.grade}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    List<Unit> units = getUnitsForGrade(grade);
+    final List<Unit> units = _getUnitsForGrade(grade);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('$grade 単元'),
-        centerTitle: true,
-      ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade200, Colors.blue.shade600],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: units.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-          itemCount: units.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-              child: Card(
-                color: Colors.white.withOpacity(0.8),
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ListTile(
-                  title: Text(
-                    units[index].title,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FormatScreen(
-                          unit: units[index],
-                          problems: units[index].problems,
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.green[500],
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
+                itemCount: units.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      _navigateToFormatScreen(context, units[index]);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: Text(
+                          units[index].title,
+                          style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: '',
-        child: const Icon(Icons.article),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 7.0,
-        color: Theme.of(context).primaryColor,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 85,
+                          height: 20,
+                          color: Colors.black87,
+                          margin: const EdgeInsets.only(left: 10),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            color: Colors.brown,
+                            width: 50,
+                            height: 30,
+                          ),
+                        ),
+                      ),
+                      Align(
+                        child: Container(
+                          width: 73,
+                          height: 7,
+                          margin: const EdgeInsets.only(left: 10),
+                          color: Colors.indigo,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              color: Colors.brown,
+              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  List<Unit> getUnitsForGrade(String grade) {
+  void _navigateToFormatScreen(BuildContext context, Unit unit) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FormatScreen(
+          unit: unit,
+          problems: unit.problems,
+        ),
+      ),
+    );
+  }
+
+  // 学年ごとに単元リストを取得する関数
+  List<Unit> _getUnitsForGrade(String grade) {
     switch (grade) {
       case '1年生':
         return [
           Unit(title: 'たしざんのけいさん', widget: const Calculations1(format: ''), problems: Calculations1.generateProblems()),
-          Unit(title: 'たしざんのあなうめ', widget: const BlankPlus(format: ''), problems: BlankPlus.generateProblems()),
-          Unit(title: 'たしざんのおはなしもんだい', widget: const SentencePlus(format: ''), problems: SentencePlus.generateProblems()),
-          Unit(title: 'ひきざんのけいさん', widget: const Calculations2(format: ''), problems: []),
-          Unit(title: 'ひきざんのあなうめ', widget: const BlankMinus(format: ''), problems: BlankMinus.generateProblems()),
-          Unit(title: 'ひきざんのおはなしもんだい', widget: const SentenceMinus(format: ''), problems: SentenceMinus.generateProblems()),
+          Unit(title: 'たしざんのあなうめ', widget: const BlankPlus(format: '',), problems: BlankPlus.generateProblems()),
+          Unit(title: 'おはなしもんだい(たしざん)', widget: const SentencePlus(format: '',), problems: SentencePlus.generateProblems()),
+          Unit(title: 'ひきざんのけいさん', widget: const Calculations2(format: ''), problems: Calculations2.generateProblems()),
+          Unit(title: 'ひきざんのあなうめ', widget: const BlankMinus(format: '',), problems: BlankMinus.generateProblems()),
+          Unit(title: 'おはなしもんだい(ひきざん)', widget: const SentenceMinus(format: '',), problems: SentenceMinus.generateProblems()),
+        ];
+      case '2年生':
+        return [
+
+        ];
+      case '3年生':
+        return [
         ];
       default:
         return [];

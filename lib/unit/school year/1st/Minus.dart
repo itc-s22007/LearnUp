@@ -9,6 +9,20 @@ class Calculations2 extends StatefulWidget {
 
   @override
   State<Calculations2> createState() => _Calculations2State();
+
+  static List<Problem> generateProblems() {
+    List<Problem> problems = [];
+    for (int i = 0; i < 10; i++) {
+      final a = Random().nextInt(20) + 1;
+      final b = Random().nextInt(a);
+
+      String question = '$a - $b = ?';
+      double answer = a + b.toDouble();
+
+      problems.add(Problem(question: question, answer: answer));
+    }
+    return problems;
+  }
 }
 
 class _Calculations2State extends State<Calculations2> {
@@ -64,7 +78,7 @@ class _Calculations2State extends State<Calculations2> {
           builder: (context) => ResultsScreen(
             correctAnswers: _correctAnswers,
             totalQuestions: _problems.length,
-            questionResults: [],
+            questionResults: [], onRetry: () {  },
           ),
         ),
       );
