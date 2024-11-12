@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../home/Profile.dart';
 import 'LevelScreen.dart';
 import '../screens/scoring_screen.dart';
+import 'Review.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,10 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: 20.0,
                       ),
                     ),
-                    const Text(
-                      '↓',
-                      style: TextStyle(color: Colors.white),
-                    ),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -93,10 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: 20.0,
                       ),
                     ),
-                    const Text(
-                      '↓',
-                      style: TextStyle(color: Colors.white),
-                    ),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -123,12 +116,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: 20.0,
                       ),
                     ),
-                    const Text(
-                      '↓',
-                      style: TextStyle(color: Colors.white),
-                    ),
                     GestureDetector(
-                      onTap: () => print("黄色チョークが押されました"),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ReviewScreen()),
+                        );
+                      },
                       child: Container(
                         width: 60,
                         height: 17,
@@ -146,10 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.white,
                         fontSize: 20.0,
                       ),
-                    ),
-                    const Text(
-                      '↓',
-                      style: TextStyle(color: Colors.white),
                     ),
                     GestureDetector(
                       onTap: () => print("青チョークが押されました"),
@@ -170,10 +161,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.white,
                         fontSize: 20.0,
                       ),
-                    ),
-                    const Text(
-                      '↓',
-                      style: TextStyle(color: Colors.white),
                     ),
                     GestureDetector(
                       onTap: () => print("ホームが押されました"),

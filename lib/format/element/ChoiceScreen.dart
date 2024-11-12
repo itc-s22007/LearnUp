@@ -129,9 +129,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
   @override
   Widget build(BuildContext context) {
     final problem = widget.problems[_currentQuestionIndex];
-
     return Scaffold(
-
       body: Column(
         children: [
 
