@@ -26,15 +26,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -48,29 +42,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDuwr6ts8yT-qnfuE7aF8EF6QHy-ehYCbY',
-    appId: '1:851637919397:web:f2d0da481e5d6450b7f74c',
-    messagingSenderId: '851637919397',
-    projectId: 'learnup-d6574',
-    authDomain: 'learnup-d6574.firebaseapp.com',
-    storageBucket: 'learnup-d6574.appspot.com',
-    measurementId: 'G-Z2C17D0PWJ',
+    apiKey: 'AIzaSyAaSP8CDu7bYMXtquWvDq6RVESZ_vBJ6uw',
+    appId: '1:987837893217:web:c744223ce08e233063b820',
+    messagingSenderId: '987837893217',
+    projectId: 'learnup-82610',
+    authDomain: 'learnup-82610.firebaseapp.com',
+    storageBucket: 'learnup-82610.firebasestorage.app',
+    measurementId: 'G-JJ6TMHTERT',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBUKNLOiT636-knc7ztvGzp0OagFgeVB7w',
-    appId: '1:851637919397:android:6a90c897a1f448b2b7f74c',
-    messagingSenderId: '851637919397',
-    projectId: 'learnup-d6574',
-    storageBucket: 'learnup-d6574.appspot.com',
+    apiKey: 'AIzaSyDumutuP9wbRzqyT1eNYvqw-2ai9ivi9y0',
+    appId: '1:987837893217:android:e1aa289a4e1adab863b820',
+    messagingSenderId: '987837893217',
+    projectId: 'learnup-82610',
+    storageBucket: 'learnup-82610.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAfHstiXRwCOMxOLIt96yC0_LJvQZpAi60',
-    appId: '1:851637919397:ios:499f85b33a2282b5b7f74c',
-    messagingSenderId: '851637919397',
-    projectId: 'learnup-d6574',
-    storageBucket: 'learnup-d6574.appspot.com',
+    apiKey: 'AIzaSyAEFuLhmZ8LDIwg_UifZaBuY-RMuy-rCf0',
+    appId: '1:987837893217:ios:31e40074896c8a6463b820',
+    messagingSenderId: '987837893217',
+    projectId: 'learnup-82610',
+    storageBucket: 'learnup-82610.firebasestorage.app',
     iosBundleId: 'com.example.learnup',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAEFuLhmZ8LDIwg_UifZaBuY-RMuy-rCf0',
+    appId: '1:987837893217:ios:31e40074896c8a6463b820',
+    messagingSenderId: '987837893217',
+    projectId: 'learnup-82610',
+    storageBucket: 'learnup-82610.firebasestorage.app',
+    iosBundleId: 'com.example.learnup',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyAaSP8CDu7bYMXtquWvDq6RVESZ_vBJ6uw',
+    appId: '1:987837893217:web:da8ca63d5b665ae863b820',
+    messagingSenderId: '987837893217',
+    projectId: 'learnup-82610',
+    authDomain: 'learnup-82610.firebaseapp.com',
+    storageBucket: 'learnup-82610.firebasestorage.app',
+    measurementId: 'G-T864NRGX9B',
+  );
+
 }
