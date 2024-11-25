@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class ResultsScreen extends StatelessWidget {
+class ResultsScreen extends StatefulWidget {
   final int totalQuestions;
   final int correctAnswers;
   final List<String> questionResults;
@@ -15,8 +16,34 @@ class ResultsScreen extends StatelessWidget {
   });
 
   @override
+  _ResultsScreenState createState() => _ResultsScreenState();
+}
+
+class _ResultsScreenState extends State<ResultsScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Map<int, bool> _isCheckedMap = {};
+
+  Future<void> _saveQuestionToFirebase(
+      int questionNumber,
+      String question,
+      String correctAnswer,
+      String userAnswer,
+      ) async {
+    await _firestore.collection('checked_questions').add({
+      'questionNumber': questionNumber,
+      'question': question,
+      'correctAnswer': correctAnswer,
+      'userAnswer': userAnswer,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+    setState(() {
+      _isCheckedMap[questionNumber] = true;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    int totalStars = ((correctAnswers / totalQuestions) * 5).round();
+    int totalStars = ((widget.correctAnswers / widget.totalQuestions) * 5).round();
 
     return Scaffold(
       body: Padding(
@@ -38,14 +65,12 @@ class ResultsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    '$correctAnswers / $totalQuestions',
+                    '${widget.correctAnswers} / ${widget.totalQuestions}',
                     style: const TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
-                  // 星の表示
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -63,9 +88,9 @@ class ResultsScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                itemCount: questionResults.length,
+                itemCount: widget.questionResults.length,
                 itemBuilder: (context, index) {
-                  final resultData = questionResults[index].split(': ');
+                  final resultData = widget.questionResults[index].split(': ');
                   final isCorrect = resultData[0] == '○';
                   final questionNumber = index + 1;
                   final question = resultData[1];
@@ -122,6 +147,23 @@ class ResultsScreen extends StatelessWidget {
                               textAlign: TextAlign.center,
                             ),
                           ),
+                          // Checkmark button
+                          IconButton(
+                            icon: Icon(
+                              Icons.check,
+                              color: _isCheckedMap[questionNumber] == true ? Colors.blue : Colors.grey,
+                            ),
+                            onPressed: () {
+                              if (_isCheckedMap[questionNumber] != true) {
+                                _saveQuestionToFirebase(
+                                  questionNumber,
+                                  question,
+                                  correctAnswer,
+                                  userAnswer,
+                                );
+                              }
+                            },
+                          ),
                         ],
                       ),
                       const Divider(thickness: 1, height: 20),
@@ -137,11 +179,10 @@ class ResultsScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    onRetry();
+                    widget.onRetry();
                   },
                   child: const Text('もう一度'),
                 ),
-
                 ElevatedButton(
                   onPressed: () {
                     Navigator.popUntil(context, (route) => route.isFirst);
@@ -156,3 +197,4 @@ class ResultsScreen extends StatelessWidget {
     );
   }
 }
+

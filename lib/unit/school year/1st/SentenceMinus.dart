@@ -39,8 +39,9 @@ class SentenceMinus extends StatefulWidget {
           .replaceAll('{b}', b.toString());
 
       double answer = a - b.toDouble();
+      String formula = '$a - $b';
 
-      generatedProblems.add(Problem(question: question, answer: answer));
+      generatedProblems.add(Problem(question: question, answer: answer, formula: formula, isInputProblem: true));
     }
 
     return generatedProblems;
