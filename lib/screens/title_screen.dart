@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../login/Login.dart'; // ログイン画面へのパス
-import '../register_screen.dart'; // 新規登録画面へのパス
+import '../login/Login.dart';
+import '../register/register_screen.dart';
 
 class TitleScreen extends StatelessWidget {
   const TitleScreen({super.key});
