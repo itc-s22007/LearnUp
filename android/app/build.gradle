@@ -45,3 +45,16 @@ android {
 flutter {
     source = "../.."
 }
+buildscript {
+    repositories {
+        // 既存のリポジトリに加え、Googleを追加
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Firebase関連のプラグインを追加
+        classpath 'com.google.gms:google-services:4.3.15'
+    }
+}
+apply plugin: 'com.google.gms.google-services'
+
