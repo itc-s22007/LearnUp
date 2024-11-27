@@ -1,20 +1,49 @@
 import 'package:flutter/material.dart';
 import '../../../models/problem.dart';
 import '../../../format/FormatScreen.dart';
-import '../unit/Unit.dart';
-import 'HomeScreen.dart';
+import '../../Unit.dart';
 
-class LevelScreen extends StatelessWidget {
-  final bool? isChoice;
-  final Function(dynamic selectedLevel) onLevelSelected;
+class Multiplicative extends StatelessWidget {
+  const Multiplicative({Key? key}) : super(key: key);
 
-  const LevelScreen({super.key, this.isChoice, required this.onLevelSelected});
+  void _navigateToFormatScreen(BuildContext context, int table) {
+    final problems = _generateMultiplicationProblems(table);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FormatScreen(
+          unit: Unit(
+            title: '$table の段の掛け算',
+            widget: const Multiplicative(),
+            problems: problems,
+          ),
+          problems: problems,
+        ),
+      ),
+    );
+  }
+
+  List<Problem> _generateMultiplicationProblems(int table) {
+    return List.generate(10, (index) {
+      final multiplier = index + 1;
+      final answer = table * multiplier;
+      final formula = '$table × $multiplier';
+
+      return Problem(
+        question: '$table × $multiplier',
+        answer: answer.toDouble(),
+        formula: formula,
+        isInputProblem: false,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> levels = ['1年生', '2年生', '3年生', '4年生', '5年生', '6年生'];
-    final List<String> leftLevels = levels.asMap().entries.where((entry) => entry.key.isEven).map((entry) => entry.value).toList();
-    final List<String> rightLevels = levels.asMap().entries.where((entry) => entry.key.isOdd).map((entry) => entry.value).toList();
+    final List<int> tables = List.generate(9, (index) => index + 1);
+    final List<int> leftTables = tables.where((table) => table % 2 != 0).toList();
+    final List<int> rightTables = tables.where((table) => table % 2 == 0).toList();
 
     return Scaffold(
       body: Container(
@@ -22,7 +51,6 @@ class LevelScreen extends StatelessWidget {
         height: double.infinity,
         color: Colors.green[500],
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
               child: Row(
@@ -32,22 +60,15 @@ class LevelScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: leftLevels.map((level) {
+                      children: leftTables.map((table) {
                         return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => UnitScreen(grade: level),
-                              ),
-                            );
-                          },
+                          onTap: () => _navigateToFormatScreen(context, table),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 40),
+                            padding: const EdgeInsets.symmetric(vertical: 20),
                             child: Transform.rotate(
                               angle: -0.2,
                               child: Text(
-                                level,
+                                '$table の段',
                                 style: const TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.bold,
@@ -64,22 +85,15 @@ class LevelScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: rightLevels.map((level) {
+                      children: rightTables.map((table) {
                         return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => UnitScreen(grade: level),
-                              ),
-                            );
-                          },
+                          onTap: () => _navigateToFormatScreen(context, table),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 40),
+                            padding: const EdgeInsets.symmetric(vertical: 20),
                             child: Transform.rotate(
                               angle: -0.2,
                               child: Text(
-                                level,
+                                '$table の段',
                                 style: const TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.bold,
@@ -100,12 +114,7 @@ class LevelScreen extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
-                      ),
-                    );
+                    Navigator.pop(context);
                   },
                   child: Column(
                     children: [

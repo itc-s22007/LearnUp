@@ -31,9 +31,15 @@ class SentencePlus extends StatefulWidget {
           .replaceAll('{a}', a.toString())
           .replaceAll('{b}', b.toString());
 
-      double answer = a + b.toDouble();
+      double answer = (a + b).toDouble();
+      String formula = '$a + $b';
 
-      generatedProblems.add(Problem(question: question, answer: answer));
+      generatedProblems.add(Problem(
+        question: question,
+        formula: formula,
+        answer: answer,
+        isInputProblem: true,
+      ));
     }
 
     return generatedProblems;
@@ -60,9 +66,37 @@ class _SentencePlusState extends State<SentencePlus> {
   }
 
   void _handleChoiceAnswer(Problem problem, double userAnswer) {
+    final correctAnswer = problem.answer;
+    bool isCorrect = userAnswer == correctAnswer;
+    _showResultDialog(isCorrect, correctAnswer, userAnswer);
   }
 
   void _handleInputAnswer(Problem problem, String userFormula, double userAnswer) {
+    final correctAnswer = problem.answer;
+    bool isCorrect = userAnswer == correctAnswer;
+    _showResultDialog(isCorrect, correctAnswer, userAnswer, userFormula: userFormula);
+  }
+
+  void _showResultDialog(bool isCorrect, double correctAnswer, double userAnswer, {String? userFormula}) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isCorrect ? '正解！' : '不正解'),
+        content: Text(
+          isCorrect
+              ? 'おめでとうございます！正解です。'
+              : '残念、不正解です。正しい答えは$correctAnswerです。${userFormula != null ? '\nあなたの式: $userFormula' : ''}\nあなたの答え: $userAnswer',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('閉じる'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -81,7 +115,7 @@ class _SentencePlusState extends State<SentencePlus> {
                 MaterialPageRoute(
                   builder: (context) => ChoiceScreen(
                     problems: _problems,
-                    onAnswerEntered: _handleChoiceAnswer, onAnswerSelected: (Problem , double ) {  },
+                    onAnswerSelected: _handleChoiceAnswer, onAnswerEntered: (Problem problem, double userAnswer) {  },
                   ),
                 ),
               );
