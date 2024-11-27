@@ -8,13 +8,26 @@ class ProgressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // サンプルデータ
+    final List<Map<String, dynamic>> progressData = [
+      {'date': '2024-11-20', 'score': 85},
+      {'date': '2024-11-21', 'score': 90},
+      {'date': '2024-11-22', 'score': 80},
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('進捗管理・学習履歴'),
+        title: const Text('進捗管理・学習履歴'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ProgressChart(studentId: studentId),
+        child: Column(
+          children: [
+            Expanded(
+              child: ProgressChart(progressData: progressData),
+            ),
+          ],
+        ),
       ),
     );
   }
