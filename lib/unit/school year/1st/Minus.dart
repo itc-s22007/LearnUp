@@ -17,9 +17,10 @@ class Calculations2 extends StatefulWidget {
       final b = Random().nextInt(a);
 
       String question = '$a - $b = ?';
+      String fomula = '$a - $b';
       double answer = a + b.toDouble();
 
-      problems.add(Problem(question: question, answer: answer));
+      problems.add(Problem(question: question, answer: answer, formula: fomula, isInputProblem: true));
     }
     return problems;
   }
@@ -44,9 +45,10 @@ class _Calculations2State extends State<Calculations2> {
       final b = Random().nextInt(a);
 
       String question = '$a - $b = ?';
+      String fomula = '$a - $b';
       double answer = a - b.toDouble();
 
-      generatedProblems.add(Problem(question: question, answer: answer));
+      generatedProblems.add(Problem(question: question, answer: answer, formula: fomula, isInputProblem: false));
     }
 
     setState(() {
