@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // FlutterFire CLIで生成されたファイルをインポート
-import 'login/Login.dart'; // ログイン画面のインポート
+import 'firebase_options.dart';
+import 'home/HomeScreen.dart';
+import 'users/loginScreen.dart';
+
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Flutterエンジンの初期化
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Firebaseの初期化
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const MyApp());
 }
@@ -22,7 +24,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const LoginScreen(), // ログイン画面をホーム画面に設定
+      // home: const FractionCalculations1(format: '',),
+      // home:  ReviewChoice(),
+      home: const LoginScreen(),
+      routes: {
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }
+
