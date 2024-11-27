@@ -3,6 +3,7 @@ import 'package:learnup/unit/school%20year/1st/Minus.dart';
 import 'package:learnup/unit/school%20year/1st/Plus.dart';
 import 'package:learnup/unit/school%20year/1st/SentenceMinus.dart';
 import 'package:learnup/unit/school%20year/1st/SentencePlus.dart';
+import 'package:learnup/unit/school year/2nd/fraction.dart';
 import 'package:learnup/unit/school%20year/3rd/division.dart';
 import 'package:learnup/unit/school%20year/3rd/multiplicative.dart';
 import 'school year/3rd/SentenceDivison.dart';
@@ -138,7 +139,9 @@ class UnitScreen extends StatelessWidget {
           Unit(title: 'おはなしもんだい(ひきざん)', widget: const SentenceMinus(format: ''), problems: SentenceMinus.generateProblems()),
         ];
       case '2年生':
-        return [];
+        return [
+          Unit(title: '分数の計算', widget: const FractionCalculations1(format: '',), problems: []),
+        ];
       case '3年生':
         return [
           Unit(title: '掛け算の計算', widget: const Multiplicative(), problems: []),

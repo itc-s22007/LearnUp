@@ -52,12 +52,10 @@ class SentenceDivide extends StatefulWidget {
 }
 
 class _SentenceDivideState extends State<SentenceDivide> {
-  List<Problem> _problems = [];
 
   @override
   void initState() {
     super.initState();
-    _problems = SentenceDivide.generateProblems();
   }
 
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:learnup/unit/Unit.dart';
 import '../../models/problem.dart';
 import 'dart:math';
-import '../../screens/results_screen.dart';
+import '../../screens/ChoiceResultScreen.dart';
 
 class ChoiceScreen extends StatefulWidget {
   final void Function(Problem, double) onAnswerSelected;
@@ -24,7 +24,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
   int _currentQuestionIndex = 0;
   int _correctAnswersCount = 0;
   bool _isAnswered = false;
-  bool _isCorrect = false;
   List<int> _currentOptions = [];
   List<String> _answerResults = [];
 
@@ -61,7 +60,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
 
     setState(() {
       _isAnswered = true;
-      _isCorrect = isCorrect;
       if (isCorrect) _correctAnswersCount++;
     });
 
@@ -86,7 +84,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
                 setState(() {
                   _currentQuestionIndex++;
                   _isAnswered = false;
-                  _isCorrect = false;
                 });
                 _generateOptions();
               } else {
@@ -104,7 +101,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ResultsScreen(
+        builder: (context) => ChoiceResultsScreen(
           totalQuestions: widget.problems.length,
           correctAnswers: _correctAnswersCount,
           questionResults: _answerResults,
@@ -119,7 +116,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
       _currentQuestionIndex = 0;
       _correctAnswersCount = 0;
       _isAnswered = false;
-      _isCorrect = false;
       _answerResults.clear();
       _generateOptions();
     });

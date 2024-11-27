@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class ResultsScreen extends StatefulWidget {
+class ChoiceResultsScreen extends StatefulWidget {
   final int totalQuestions;
   final int correctAnswers;
   final List<String> questionResults;
   final VoidCallback onRetry;
 
-  const ResultsScreen({
+  const ChoiceResultsScreen({
     super.key,
     required this.totalQuestions,
     required this.correctAnswers,
@@ -16,10 +16,10 @@ class ResultsScreen extends StatefulWidget {
   });
 
   @override
-  _ResultsScreenState createState() => _ResultsScreenState();
+  _ChoiceResultsScreenState createState() => _ChoiceResultsScreenState();
 }
 
-class _ResultsScreenState extends State<ResultsScreen> {
+class _ChoiceResultsScreenState extends State<ChoiceResultsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<int, bool> _isCheckedMap = {};
 
@@ -29,7 +29,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       String correctAnswer,
       String userAnswer,
       ) async {
-    await _firestore.collection('checked_questions').add({
+    await _firestore.collection('Choice_questions').add({
       'questionNumber': questionNumber,
       'question': question,
       'correctAnswer': correctAnswer,

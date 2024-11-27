@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
 
 class Measurements1 extends StatefulWidget {

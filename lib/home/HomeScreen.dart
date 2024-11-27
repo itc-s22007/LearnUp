@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'Profile.dart';
 import 'LevelScreen.dart';
 import '../screens/scoring_screen.dart';
-import 'Review.dart';
+import 'review/Review.dart';
 import 'challenge.dart';
 
 class HomeScreen extends StatefulWidget {
