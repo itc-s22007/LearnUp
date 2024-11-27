@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../screens/progress_screen.dart';
 import 'Profile.dart';
 import 'LevelScreen.dart';
 import '../screens/scoring_screen.dart';
-import 'Review.dart';
+import 'review/Review.dart';
 import 'challenge.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -156,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const ScoringScreen()),
+                              builder: (context) => const ProgressScreen(studentId: 'sampleStudentId')),
                         );
                       },
                       child: Container(

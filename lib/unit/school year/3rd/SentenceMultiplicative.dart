@@ -51,7 +51,6 @@ class SentenceMultiplicative extends StatefulWidget {
 }
 
 class _SentenceMultiplicative extends State<SentenceMultiplicative> {
-  List<Problem> _problems = [];
 
   @override
   void initState() {
@@ -61,7 +60,6 @@ class _SentenceMultiplicative extends State<SentenceMultiplicative> {
 
   void _generateNewProblems() {
     setState(() {
-      _problems = SentenceMultiplicative.generateProblems();
     });
   }
   @override

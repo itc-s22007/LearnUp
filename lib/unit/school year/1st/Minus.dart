@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
-import '../../../screens/results_screen.dart';
+import '../../../screens/ChoiceResultScreen.dart';
 
 class Calculations2 extends StatefulWidget {
   const Calculations2({Key? key, required String format}) : super(key: key);
@@ -77,7 +77,7 @@ class _Calculations2State extends State<Calculations2> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ResultsScreen(
+          builder: (context) => ChoiceResultsScreen(
             correctAnswers: _correctAnswers,
             totalQuestions: _problems.length,
             questionResults: [], onRetry: () {  },

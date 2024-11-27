@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'home/HomeScreen.dart';
+import 'users/loginScreen.dart';
 import 'screens/progress_screen.dart';
 
 void main() async {
@@ -19,7 +21,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ProgressScreen(studentId: 'sampleStudentId'), // ここで学生IDを設定
+
+      home: const LoginScreen(),
+      routes: {
+        '/home': (context) => const HomeScreen(),
+      },
+      // home: ProgressScreen(studentId: 'sampleStudentId'),
     );
   }
 }
+

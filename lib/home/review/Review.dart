@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'HomeScreen.dart';
+import '../HomeScreen.dart';
+import 'reviewFormat/ReviewChoice.dart';
+import 'reviewFormat/ReviewInput.dart';
+
 class ReviewScreen extends StatefulWidget {
   const ReviewScreen({super.key});
 
@@ -8,22 +11,10 @@ class ReviewScreen extends StatefulWidget {
 }
 
 class _ReviewScreenState extends State<ReviewScreen> {
-  int currentIndex = 0;
-
-  void _onTextTap(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('閉じる'),
-            ),
-          ],
-        );
-      },
+  void _navigateToHome() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
 
@@ -42,6 +33,37 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   Container(
                     width: double.infinity,
                     color: Colors.green,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildFormatButton(
+                              context,
+                              '選択問題',
+                                  () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ReviewChoice(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            _buildFormatButton(
+                              context,
+                              '入力問題',
+                                  () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ReviewInput(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -59,13 +81,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
-                        );
-                      },
+                      onTap: _navigateToHome,
                       child: Column(
                         children: [
                           Align(
@@ -104,6 +120,17 @@ class _ReviewScreenState extends State<ReviewScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFormatButton(
+      BuildContext context, String title, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(title),
       ),
     );
   }

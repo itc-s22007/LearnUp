@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
-import '../../../screens/results_screen.dart';
+import '../../../screens/ChoiceResultScreen.dart';
 
 class Calculations1 extends StatefulWidget {
   const Calculations1({Key? key, required String format}) : super(key: key);
@@ -28,12 +28,10 @@ class Calculations1 extends StatefulWidget {
 
 class _Calculations1State extends State<Calculations1> {
   List<Problem> _problems = [];
-  bool _isGenerating = false;
   int _correctAnswers = 0;
 
   void _generateProblems() async {
     setState(() {
-      _isGenerating = true;
     });
 
     await Future.delayed(const Duration(seconds: 1));
@@ -54,7 +52,6 @@ class _Calculations1State extends State<Calculations1> {
 
     setState(() {
       _problems = generatedProblems;
-      _isGenerating = false;
     });
 
     Navigator.push(
@@ -78,7 +75,7 @@ class _Calculations1State extends State<Calculations1> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ResultsScreen(
+          builder: (context) => ChoiceResultsScreen(
             correctAnswers: _correctAnswers,
             totalQuestions: _problems.length,
             questionResults: [], onRetry: () {  },

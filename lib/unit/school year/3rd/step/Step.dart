@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 import '../../../../format/element/ChoiceScreen.dart';
 import '../../../../models/problem.dart';
-import '../../../../screens/results_screen.dart';
+import '../../../../screens/ChoiceResultScreen.dart';
 
 class MultiplicationProblems extends StatefulWidget {
   final int selectedTable;
@@ -45,7 +44,7 @@ class _MultiplicationProblemsState extends State<MultiplicationProblems> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ResultsScreen(
+          builder: (context) => ChoiceResultsScreen(
             correctAnswers: _correctAnswers,
             totalQuestions: _problems.length,
             questionResults: const [],

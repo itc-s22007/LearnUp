@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../../models/problem.dart';
-import '../../../format/element/ChoiceScreen.dart';
 
 class SentenceMinus extends StatefulWidget {
   final String format;
