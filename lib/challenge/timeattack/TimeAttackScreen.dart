@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
-import '../../screens/results_screen.dart';
+import '../../screens/ChoiceResultScreen.dart';
 
 class TimeAttackScreen extends StatefulWidget {
   final String operation;
@@ -155,7 +155,7 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => ResultsScreen(
+        builder: (context) => ChoiceResultsScreen(
           totalQuestions: questionResults.length,
           correctAnswers: currentScore,
           questionResults: questionResults,

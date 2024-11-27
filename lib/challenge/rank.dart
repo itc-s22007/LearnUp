@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'userprofile.dart';
 
 class RankScreen extends StatelessWidget {
   final String operation;
@@ -14,8 +12,6 @@ class RankScreen extends StatelessWidget {
         .collection('ranks')
         .doc(operation)
         .collection('scores');
-
-    final User? currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -44,8 +40,6 @@ class RankScreen extends StatelessWidget {
               final rankData = ranks[index].data() as Map<String, dynamic>;
               final userName = rankData['userName'] ?? '不明なユーザー';
               final score = rankData['score'] as int? ?? 0;
-
-              final isCurrentUser = currentUser?.email == rankData['email'];
 
               IconData rankIcon;
               Color rankColor;

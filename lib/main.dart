@@ -3,33 +3,30 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'home/HomeScreen.dart';
 import 'users/loginScreen.dart';
-
+import 'screens/progress_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login Demo',
+      title: 'LearnUp Progress Tracker',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      // home: const FractionCalculations1(format: '',),
-      // home:  ReviewChoice(),
+
       home: const LoginScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),
       },
+      // home: ProgressScreen(studentId: 'sampleStudentId'),
     );
   }
 }

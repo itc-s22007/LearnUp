@@ -3,20 +3,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// 学生の学習進捗を取得するメソッド
+  /// 学習進捗を取得する
   Stream<QuerySnapshot> getStudyProgress(String studentId) {
+    return _firestore
+        .collection('studyProgress')
+        .where('studentId', isEqualTo: studentId) // studentId でフィルタリング
+        .orderBy('timestamp') // タイムスタンプ順にソート
+        .snapshots();
+  }
+
+  /// 学習進捗を Firestore に追加
+  Future<void> addStudyProgress({
+    required String studentId,
+    required int score,
+    required String taskName,
+  }) async {
     try {
-      return _firestore
-          .collection('students') // `students` コレクション
-          .doc(studentId) // 学生ごとのドキュメント
-          .collection('progress') // 進捗データのサブコレクション
-          .orderBy('timestamp') // 時間順に並び替え
-          .snapshots();
-
-
+      await _firestore.collection('studyProgress').add({
+        'studentId': studentId,
+        'score': score,
+        'taskName': taskName,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      print('学習進捗が保存されました');
     } catch (e) {
-      print('Error fetching study progress: $e');
-      return const Stream.empty();
+      print('エラーが発生しました: $e');
+      throw e;
     }
   }
 }

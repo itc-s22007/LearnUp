@@ -1,21 +1,27 @@
-# learnup
+# 追記　報告
 
-A new Flutter project.
+## １〜６年生までの単元を最低限にしたいからなにか案あったら
+- 1年生
+  - 足し算、引き算の計算
+  - 簡単な文章問題
+  - 穴埋め問題(1桁)
+  - 長さの問題
+  - 時間の問題
+- ２年生
+  - グラフと表の問題
+  - 文章問題(2桁)
+  - 足し算の入れ替え
+  - 長さの単位
+  - ３桁、４桁の数
+  - 分数
+- ３年生
+  - 掛け算
+  - 割り算
+  - 表
+  - 暗算の工夫
+  - 割り算のあまり
+  - 大小の不等号
+  - 小数点
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# LearnUp
-
-[//]: # (s22007)
-// sasasasa
+## 個人のプロフィール画面を追加
 
