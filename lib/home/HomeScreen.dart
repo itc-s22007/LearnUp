@@ -157,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const ProgressScreen(studentId: 'sampleStudentId')),
+                              builder: (context) => ProgressScreen()),
                         );
                       },
                       child: Container(
