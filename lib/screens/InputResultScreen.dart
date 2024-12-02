@@ -23,9 +23,16 @@ class _InputResultsScreenState extends State<InputResultsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<int, bool> _isCheckedMap = {};
 
-  Future<void> _saveQuestionToFirebase(int questionNumber, String question, String correctFormula, String correctAnswer, String userFormula, String userAnswer) async {
+  Future<void> _saveStarsToFirebase(int totalStars) async {
+    await _firestore.collection('star_records').add({
+      'totalStars': totalStars,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> _saveQuestionToFirebase(
+      int questionNumber, String question, String correctFormula, String correctAnswer, String userFormula, String userAnswer) async {
     await _firestore.collection('checked_questions').add({
-      'questionNumber': questionNumber,
       'question': question,
       'correctFormula': correctFormula,
       'correctAnswer': correctAnswer,
@@ -36,6 +43,13 @@ class _InputResultsScreenState extends State<InputResultsScreen> {
     setState(() {
       _isCheckedMap[questionNumber] = true;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    int totalStars = ((widget.correctAnswers / widget.totalQuestions) * 5).round();
+    _saveStarsToFirebase(totalStars);
   }
 
   @override
@@ -85,125 +99,123 @@ class _InputResultsScreenState extends State<InputResultsScreen> {
             const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                  itemCount: widget.questionResults.length,
-                  itemBuilder: (context, index) {
+                itemCount: widget.questionResults.length,
+                itemBuilder: (context, index) {
+                  final resultData = widget.questionResults[index].split(': ');
+                  final questionNumber = index + 1;
+                  final isCorrect = resultData.isNotEmpty && resultData[0] == '○';
+                  final question = resultData.length > 1 ? resultData[1] : 'N/A';
+                  final userFormula = resultData.length > 3 ? resultData[3] : 'N/A';
+                  final userAnswer = resultData.length > 5 ? resultData[5] : 'N/A';
+                  final correctFormula = resultData.length > 7 ? resultData[7] : 'N/A';
+                  final correctAnswer = resultData.length > 9 ? resultData[9] : 'N/A';
 
-                    final resultData = widget.questionResults[index].split(': ');
-                    final questionNumber = index + 1;
-                    final isCorrect = resultData.isNotEmpty && resultData[0] == '○';
-                    final question = resultData.length > 1 ? resultData[1] : 'N/A';
-                    final userFormula = resultData.length > 3 ? resultData[3] : 'N/A';
-                    final userAnswer = resultData.length > 5 ? resultData[5] : 'N/A';
-                    final correctFormula = resultData.length > 7 ? resultData[7] : 'N/A';
-                    final correctAnswer = resultData.length > 9 ? resultData[9] : 'N/A';
-
-                    return Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: Text(
-                                '問$questionNumber.',
-                                style: const TextStyle(fontSize: 16),
-                                textAlign: TextAlign.center,
-                              ),
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              '問$questionNumber.',
+                              style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
                             ),
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                question,
-                                style: const TextStyle(fontSize: 16),
-                                textAlign: TextAlign.left,
-                              ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              question,
+                              style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.left,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  const Text(
-                                    '自分の解答',
-                                    style: const TextStyle(fontSize: 14),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    '式: $userFormula',
-                                    style: const TextStyle(fontSize: 14),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    '答え: $userAnswer',
-                                    style: const TextStyle(fontSize: 14),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                const Text(
+                                  '自分の解答',
+                                  style: TextStyle(fontSize: 14),
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  '式: $userFormula',
+                                  style: const TextStyle(fontSize: 14),
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  '答え: $userAnswer',
+                                  style: const TextStyle(fontSize: 14),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  const Text(
-                                    '正答',
-                                    style: const TextStyle(fontSize: 14),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    '式: $correctFormula',
-                                    style: const TextStyle(fontSize: 14),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Text(
-                                    '答え: $correctAnswer',
-                                    style: const TextStyle(fontSize: 14),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                const Text(
+                                  '正答',
+                                  style: TextStyle(fontSize: 14),
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  '式: $correctFormula',
+                                  style: const TextStyle(fontSize: 14),
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  '答え: $correctAnswer',
+                                  style: const TextStyle(fontSize: 14),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    isCorrect ? '○' : '×',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: isCorrect ? Colors.green : Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                          ),
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  isCorrect ? '○' : '×',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: isCorrect ? Colors.green : Colors.red,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.check,
-                                      color: _isCheckedMap[questionNumber] == true ? Colors.blue : Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      if (_isCheckedMap[questionNumber] != true) {
-                                        _saveQuestionToFirebase(
-                                          questionNumber,
-                                          question,
-                                          correctFormula,
-                                          correctAnswer,
-                                          userFormula,
-                                          userAnswer,
-                                        );
-                                      }
-                                    },
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.check,
+                                    color: _isCheckedMap[questionNumber] == true ? Colors.blue : Colors.grey,
                                   ),
-                                ],
-                              ),
+                                  onPressed: () {
+                                    if (_isCheckedMap[questionNumber] != true) {
+                                      _saveQuestionToFirebase(
+                                        questionNumber,
+                                        question,
+                                        correctFormula,
+                                        correctAnswer,
+                                        userFormula,
+                                        userAnswer,
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        const Divider(thickness: 1, height: 20),
-                      ],
-                    );
-                  }
-
+                          ),
+                        ],
+                      ),
+                      const Divider(thickness: 1, height: 20),
+                    ],
+                  );
+                },
               ),
             ),
             const SizedBox(height: 20),

@@ -4,11 +4,11 @@ import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
 import '../../../screens/ChoiceResultScreen.dart';
 
-class Calculations2 extends StatefulWidget {
-  const Calculations2({Key? key, required String format}) : super(key: key);
+class Minus1 extends StatefulWidget {
+  const Minus1({Key? key, required String format}) : super(key: key);
 
   @override
-  State<Calculations2> createState() => _Calculations2State();
+  State<Minus1> createState() => _Calculations2State();
 
   static List<Problem> generateProblems() {
     List<Problem> problems = [];
@@ -26,7 +26,7 @@ class Calculations2 extends StatefulWidget {
   }
 }
 
-class _Calculations2State extends State<Calculations2> {
+class _Calculations2State extends State<Minus1> {
   List<Problem> _problems = [];
   bool _isGenerating = false;
   int _correctAnswers = 0;
@@ -41,7 +41,7 @@ class _Calculations2State extends State<Calculations2> {
     List<Problem> generatedProblems = [];
 
     for (int i = 0; i < 10; i++) {
-      final a = Random().nextInt(9) + 1;
+      final a = Random().nextInt(20) + 1;
       final b = Random().nextInt(a);
 
       String question = '$a - $b = ?';
@@ -90,33 +90,7 @@ class _Calculations2State extends State<Calculations2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ひきざんのけいさん'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: _isGenerating
-              ? const CircularProgressIndicator()
-              : Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'これからひきざんのけいさんがはじまります！',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _generateProblems,
-                child: const Text('問題を始める'),
-              ),
-            ],
-          ),
-        ),
-      ),
+
     );
   }
 }
