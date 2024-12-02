@@ -1,34 +1,27 @@
-// lib/screens/progress_screen.dart
 import 'package:flutter/material.dart';
-import '../models/progress_data.dart';
 import '../widgets/progress_chart.dart';
 
 class ProgressScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // ダミーデータ (仮のデータ。後ほどFirebaseから取得する形に変更)
-    final List<ProgressData> progressData = [
-      ProgressData(date: DateTime(2024, 11, 20), score: 85, duration: 60),
-      ProgressData(date: DateTime(2024, 11, 21), score: 90, duration: 45),
-      ProgressData(date: DateTime(2024, 11, 22), score: 80, duration: 50),
-    ];
+    // サンプルデータ
+    final scores = {
+      DateTime(2024, 12, 1): 75.0,
+      DateTime(2024, 12, 2): 80.0,
+      DateTime(2024, 12, 3): 95.0,
+    };
+
+    final learningTimes = {
+      DateTime(2024, 12, 1): 1.5,
+      DateTime(2024, 12, 2): 2.0,
+      DateTime(2024, 12, 3): 1.0,
+    };
 
     return Scaffold(
-      appBar: AppBar(title: const Text('進捗管理・学習履歴')),
+      appBar: AppBar(title: Text("進捗管理・学習履歴")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const Text(
-              'スコアと学習時間の推移',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ProgressChart(progressData: progressData),
-            ),
-          ],
-        ),
+        child: ProgressChart(scores: scores, learningTimes: learningTimes),
       ),
     );
   }

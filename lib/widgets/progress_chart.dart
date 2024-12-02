@@ -1,58 +1,95 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../models/progress_data.dart';
 
-class ProgressChart extends StatelessWidget {
-  final List<ProgressData> progressData;
+class ProgressChart extends StatefulWidget {
+  final Map<DateTime, double> scores;
+  final Map<DateTime, double> learningTimes;
 
-  const ProgressChart({Key? key, required this.progressData}) : super(key: key);
+  const ProgressChart({
+    Key? key,
+    required this.scores,
+    required this.learningTimes,
+  }) : super(key: key);
+
+  @override
+  _ProgressChartState createState() => _ProgressChartState();
+}
+
+class _ProgressChartState extends State<ProgressChart> {
+  bool showScores = true; // true: スコア, false: 学習時間
 
   @override
   Widget build(BuildContext context) {
-    return LineChart(
-      LineChartData(
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 40,
-              interval: 10,
-              getTitlesWidget: (value, meta) => Text(
-                value.toInt().toString(), // 左の数値ラベル
-                style: const TextStyle(fontSize: 10),
-              ),
+    final data = showScores ? widget.scores : widget.learningTimes;
+
+    return Column(
+      children: [
+        // タイトル部分
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              showScores ? "スコア" : "学習時間",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 40,
-              getTitlesWidget: (value, meta) => Text(
-                '${value.toInt()}', // 下の数値ラベル
-                style: const TextStyle(fontSize: 10),
+            Switch(
+              value: showScores,
+              onChanged: (value) {
+                setState(() {
+                  showScores = value;
+                });
+              },
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        // 棒グラフ本体
+        Expanded(
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceAround,
+              barGroups: _createBarGroups(data),
+              titlesData: FlTitlesData(
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, _) {
+                      final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                      return Text(
+                        "${date.month}/${date.day}",
+                        style: TextStyle(fontSize: 10),
+                      );
+                    },
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: showScores ? 10 : 1,
+                    getTitlesWidget: (value, _) => Text(value.toInt().toString()),
+                  ),
+                ),
               ),
             ),
           ),
         ),
-        lineBarsData: [
-          // スコアのグラフ
-          LineChartBarData(
-            spots: progressData.map((data) => FlSpot(data.date.day.toDouble(), data.score.toDouble())).toList(),
-            isCurved: true,
+      ],
+    );
+  }
+
+  List<BarChartGroupData> _createBarGroups(Map<DateTime, double> data) {
+    return data.entries.map((entry) {
+      final timestamp = entry.key.millisecondsSinceEpoch.toDouble();
+      return BarChartGroupData(
+        x: timestamp.toInt(),
+        barRods: [
+          BarChartRodData(
+            toY: entry.value,
             color: Colors.blue,
-            barWidth: 4,
-            belowBarData: BarAreaData(show: false),
-          ),
-          // 学習時間のグラフ
-          LineChartBarData(
-            spots: progressData.map((data) => FlSpot(data.date.day.toDouble(), data.duration.toDouble())).toList(),
-            isCurved: true,
-            color: Colors.green,
-            barWidth: 4,
-            belowBarData: BarAreaData(show: false),
+            width: 16,
           ),
         ],
-      ),
-    );
+      );
+    }).toList();
   }
 }
