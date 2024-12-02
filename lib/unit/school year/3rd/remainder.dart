@@ -4,51 +4,44 @@ import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
 import '../../../screens/ChoiceResultScreen.dart';
 
-class Plus1 extends StatefulWidget {
-  const Plus1({Key? key, required String format}) : super(key: key);
+class RemainderProblems extends StatefulWidget {
+  const RemainderProblems({Key? key, required String format}) : super(key: key);
 
   @override
-  State<Plus1> createState() => _Calculations1State();
+  State<RemainderProblems> createState() => _RemainderProblemsState();
 
   static List<Problem> generateProblems() {
     List<Problem> problems = [];
     for (int i = 0; i < 10; i++) {
-      final a = Random().nextInt(20) + 1;
-      final b = Random().nextInt(a);
+      final b = Random().nextInt(9) + 1;
+      final a = Random().nextInt(90) + 10;
 
-      String question = '$a + $b = ?';
-      String formula = '$a + $b';
-      double answer = a + b.toDouble();
+      String question = '$a ÷ $b のあまりは？';
+      String formula = '$a % $b';
 
-      problems.add(Problem(question: question, answer: answer, isInputProblem: false, formula: formula));
+      int remainder = a % b;
+
+      problems.add(Problem(
+        question: question,
+        formula: formula,
+        answer: remainder.toDouble(),
+        isInputProblem: true,
+      ));
     }
     return problems;
   }
 }
 
-class _Calculations1State extends State<Plus1> {
+class _RemainderProblemsState extends State<RemainderProblems> {
   List<Problem> _problems = [];
   int _correctAnswers = 0;
 
   void _generateProblems() async {
-    setState(() {
-    });
+    setState(() {});
 
     await Future.delayed(const Duration(seconds: 1));
 
-    List<Problem> generatedProblems = [];
-
-    for (int i = 0; i < 10; i++) {
-      final a = Random().nextInt(20) + 1;
-      final b = Random().nextInt(a);
-
-      String question = '$a + $b = ?';
-      String formula = '$a + $b';
-      double answer = a + b.toDouble();
-
-      generatedProblems.add(Problem(question: question, formula: formula, answer: answer, isInputProblem: false));
-
-    }
+    List<Problem> generatedProblems = RemainderProblems.generateProblems();
 
     setState(() {
       _problems = generatedProblems;
@@ -60,11 +53,13 @@ class _Calculations1State extends State<Plus1> {
         builder: (context) => ChoiceScreen(
           problems: _problems,
           onAnswerSelected: _handleAnswerSelected,
-          unit: null, onAnswerEntered: (Problem problem, double userAnswer) {  },
+          unit: null,
+          onAnswerEntered: (Problem problem, double userAnswer) {},
         ),
       ),
     );
   }
+
   void _handleAnswerSelected(Problem problem, double userAnswer) {
     if (problem.answer == userAnswer) {
       _correctAnswers++;
@@ -78,7 +73,8 @@ class _Calculations1State extends State<Plus1> {
           builder: (context) => ChoiceResultsScreen(
             correctAnswers: _correctAnswers,
             totalQuestions: _problems.length,
-            questionResults: [], onRetry: () {  },
+            questionResults: const [],
+            onRetry: () {},
           ),
         ),
       );
@@ -88,6 +84,9 @@ class _Calculations1State extends State<Plus1> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+      ),
     );
   }
 }

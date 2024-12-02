@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:learnup/unit/school%20year/1st/Minus.dart';
-import 'package:learnup/unit/school%20year/1st/Plus.dart';
-import 'package:learnup/unit/school%20year/1st/SentenceMinus.dart';
-import 'package:learnup/unit/school%20year/1st/SentencePlus.dart';
-import 'package:learnup/unit/school year/2nd/fraction.dart';
-import 'package:learnup/unit/school%20year/3rd/division.dart';
-import 'package:learnup/unit/school%20year/3rd/multiplicative.dart';
+import 'package:learnup/unit/school%20year/4th/ApproximateNumber.dart';
+import 'school year/1st/Minus.dart';
+import 'school year/1st/Plus.dart';
+import 'school year/1st/SentenceMinus.dart';
+import 'school year/1st/SentencePlus.dart';
+import 'school year/2nd/Plus2.dart';
+import 'school year/2nd/Minus2.dart';
+import 'school year/2nd/SentenceMinus2.dart';
+import 'school year/2nd/SentencePlus2.dart';
+import 'school year/3rd/division.dart';
+import 'school year/3rd/multiplicative.dart';
 import 'school year/3rd/SentenceDivison.dart';
+import 'school year/3rd/remainder.dart';
 import 'school year/3rd/SentenceMultiplicative.dart';
 import '../models/problem.dart';
 import '../format/FormatScreen.dart';
 import 'package:learnup/unit/school%20year/1st/BlankMinus.dart' as bm;
 import 'package:learnup/unit/school%20year/1st/BlankPlus.dart' as bp;
+
+
+
 
 class UnitScreen extends StatelessWidget {
   final String grade;
@@ -131,23 +139,34 @@ class UnitScreen extends StatelessWidget {
     switch (grade) {
       case '1年生':
         return [
-          Unit(title: 'たしざんのけいさん', widget: const Calculations1(format: ''), problems: Calculations1.generateProblems()),
+          Unit(title: 'たしざん(１ケタ、２ケタ）', widget: const Plus1(format: ''), problems: Plus1.generateProblems()),
           Unit(title: 'たしざんのあなうめ', widget: const bp.BlankPlus(format: ''), problems: bp.BlankPlus.generateProblems()),
           Unit(title: 'おはなしもんだい(たしざん)', widget: const SentencePlus(format: ''), problems: SentencePlus.generateProblems()),
-          Unit(title: 'ひきざんのけいさん', widget: const Calculations2(format: ''), problems: Calculations2.generateProblems()),
+          Unit(title: 'ひきざん（１ケタ、２ケタ）', widget: const Minus1(format: ''), problems: Minus1.generateProblems()),
           Unit(title: 'ひきざんのあなうめ', widget: const bm.BlankMinus(format: ''), problems: bm.BlankMinus.generateProblems()),
           Unit(title: 'おはなしもんだい(ひきざん)', widget: const SentenceMinus(format: ''), problems: SentenceMinus.generateProblems()),
         ];
       case '2年生':
         return [
-          Unit(title: '分数の計算', widget: const FractionCalculations1(format: '',), problems: []),
+          Unit(title: '足し算（３ケタ）', widget: const Plus2(format: ''), problems: Plus2.generateProblems()),
+          Unit(title: '足し算（３ケタ）', widget: const Minus2(format: ''), problems: Minus2.generateProblems()),
+          Unit(title: '２ケタの文章問題(足し算)', widget: const SentencePlus2(format: ''), problems: SentencePlus2.generateProblems()),
+          Unit(title: '２ケタの文章問題(引き算)', widget: const SentenceMinus2(format: ''), problems: SentenceMinus2.generateProblems()),
+
         ];
       case '3年生':
         return [
           Unit(title: '掛け算の計算', widget: const Multiplicative(), problems: []),
           Unit(title: '割り算の計算', widget: const DivisionProblems(format: ''), problems: DivisionProblems.generateProblems()),
+          Unit(title: '割り算の余り', widget: const RemainderProblems(format: ''), problems: RemainderProblems.generateProblems()),
           Unit(title: '掛け算の文章問題', widget: const SentenceMultiplicative(format: ''), problems: SentenceMultiplicative.generateProblems()),
-          Unit(title: '割り算の文章問題', widget: const SentenceDivide(format: ''), problems: SentenceDivide.generateProblems())
+          Unit(title: '割り算の文章問題', widget: const SentenceDivide(format: ''), problems: SentenceDivide.generateProblems()),
+
+        ];
+      case '4年生':
+        return [
+          Unit(title: 'がい数', widget: const RoundingProblems(format: ''), problems: RoundingProblems.generateProblems())
+
         ];
       default:
         return [];

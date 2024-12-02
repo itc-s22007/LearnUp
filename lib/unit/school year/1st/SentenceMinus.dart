@@ -29,7 +29,7 @@ class SentenceMinus extends StatefulWidget {
     for (int i = 0; i < 10; i++) {
       final template = templates[Random().nextInt(templates.length)];
       final name = names[Random().nextInt(names.length)];
-      final a = Random().nextInt(20) + 1;
+      final a = Random().nextInt(9) + 1;
       final b = Random().nextInt(a) + 1;
 
       String question = template

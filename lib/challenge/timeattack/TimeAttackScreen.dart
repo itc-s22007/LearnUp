@@ -86,7 +86,7 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
       question = '$a ÷ $b = ?';
     } else {
       a = random.nextInt(20) + 1;
-      b = random.nextInt(20) + 1;
+      b = random.nextInt(a) + 1;
       if (widget.operation == 'add') {
         question = '$a + $b = ?';
       } else if (widget.operation == 'subtract') {

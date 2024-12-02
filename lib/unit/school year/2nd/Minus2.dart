@@ -4,34 +4,36 @@ import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
 import '../../../screens/ChoiceResultScreen.dart';
 
-class Plus1 extends StatefulWidget {
-  const Plus1({Key? key, required String format}) : super(key: key);
+class Minus2 extends StatefulWidget {
+  const Minus2({Key? key, required String format}) : super(key: key);
 
   @override
-  State<Plus1> createState() => _Calculations1State();
+  State<Minus2> createState() => _Calculations2State();
 
   static List<Problem> generateProblems() {
     List<Problem> problems = [];
     for (int i = 0; i < 10; i++) {
-      final a = Random().nextInt(20) + 1;
+      final a = Random().nextInt(900) + 1;
       final b = Random().nextInt(a);
 
-      String question = '$a + $b = ?';
-      String formula = '$a + $b';
+      String question = '$a - $b = ?';
+      String fomula = '$a - $b';
       double answer = a + b.toDouble();
 
-      problems.add(Problem(question: question, answer: answer, isInputProblem: false, formula: formula));
+      problems.add(Problem(question: question, answer: answer, formula: fomula, isInputProblem: true));
     }
     return problems;
   }
 }
 
-class _Calculations1State extends State<Plus1> {
+class _Calculations2State extends State<Minus2> {
   List<Problem> _problems = [];
+  bool _isGenerating = false;
   int _correctAnswers = 0;
 
   void _generateProblems() async {
     setState(() {
+      _isGenerating = true;
     });
 
     await Future.delayed(const Duration(seconds: 1));
@@ -42,16 +44,16 @@ class _Calculations1State extends State<Plus1> {
       final a = Random().nextInt(20) + 1;
       final b = Random().nextInt(a);
 
-      String question = '$a + $b = ?';
-      String formula = '$a + $b';
-      double answer = a + b.toDouble();
+      String question = '$a - $b = ?';
+      String fomula = '$a - $b';
+      double answer = a - b.toDouble();
 
-      generatedProblems.add(Problem(question: question, formula: formula, answer: answer, isInputProblem: false));
-
+      generatedProblems.add(Problem(question: question, answer: answer, formula: fomula, isInputProblem: false));
     }
 
     setState(() {
       _problems = generatedProblems;
+      _isGenerating = false;
     });
 
     Navigator.push(
@@ -65,13 +67,13 @@ class _Calculations1State extends State<Plus1> {
       ),
     );
   }
+
   void _handleAnswerSelected(Problem problem, double userAnswer) {
     if (problem.answer == userAnswer) {
       _correctAnswers++;
     }
 
-    int currentIndex = _problems.indexOf(problem);
-    if (currentIndex >= 0 && currentIndex == _problems.length - 1) {
+    if (_problems.indexOf(problem) == _problems.length - 1) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -87,7 +89,8 @@ class _Calculations1State extends State<Plus1> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
+
     );
   }
 }

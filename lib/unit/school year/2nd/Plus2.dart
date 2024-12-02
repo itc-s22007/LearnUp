@@ -4,16 +4,16 @@ import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
 import '../../../screens/ChoiceResultScreen.dart';
 
-class Plus1 extends StatefulWidget {
-  const Plus1({Key? key, required String format}) : super(key: key);
+class Plus2 extends StatefulWidget {
+  const Plus2({Key? key, required String format}) : super(key: key);
 
   @override
-  State<Plus1> createState() => _Calculations1State();
+  State<Plus2> createState() => _Calculations1State();
 
   static List<Problem> generateProblems() {
     List<Problem> problems = [];
     for (int i = 0; i < 10; i++) {
-      final a = Random().nextInt(20) + 1;
+      final a = Random().nextInt(900) + 100;
       final b = Random().nextInt(a);
 
       String question = '$a + $b = ?';
@@ -26,7 +26,7 @@ class Plus1 extends StatefulWidget {
   }
 }
 
-class _Calculations1State extends State<Plus1> {
+class _Calculations1State extends State<Plus2> {
   List<Problem> _problems = [];
   int _correctAnswers = 0;
 
