@@ -1,0 +1,19 @@
+# pack-refs with: peeled fully-peeled sorted 
+e6bd4ad8c3c5728762cad31f2df60ae05d785e1e refs/heads/HomeConnection
+31a966ec12bbf212f15f9ec82bbcd1357c2abe81 refs/heads/main
+07357d9601db10b040c058d85a4064d6bc6296fc refs/heads/problemselectionscreen
+f6b79db3af95bfa4575f3d7e714417b160e18313 refs/heads/quizScreen
+3a3fee6b19740c3e4fd3729f8a92adcb8f6b335a refs/heads/s21012test
+7d3190b1ac21f6fa65321d51754d19fe287d970b refs/heads/scoring_screen
+59a512e20ca42760200465ee4003dc6d0cd07bd9 refs/pull/1/head
+f6b79db3af95bfa4575f3d7e714417b160e18313 refs/pull/10/head
+e6bd4ad8c3c5728762cad31f2df60ae05d785e1e refs/pull/11/head
+7d3190b1ac21f6fa65321d51754d19fe287d970b refs/pull/12/head
+7478ce9a5d4a245438aff3a3f5f9c2242e64b915 refs/pull/2/head
+73cc5908edd7573774774fd65aea5804fb92f599 refs/pull/3/head
+5ca37ef90a7d37c4c0d14ba9cd633438580de0e8 refs/pull/4/head
+2e06509eb381659fdfb2e974d7e7ce6a0ffbe003 refs/pull/5/head
+343e3abdfea7b4ad62dc7a1f9a7f77690825e3a8 refs/pull/6/head
+3a3fee6b19740c3e4fd3729f8a92adcb8f6b335a refs/pull/7/head
+07357d9601db10b040c058d85a4064d6bc6296fc refs/pull/8/head
+2926065d5aa515f002babb1e76da82a8a5102e24 refs/pull/9/head

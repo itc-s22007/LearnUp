@@ -1,4 +1,4 @@
-# Project-level configuration.
+# Project-unit configuration.
 cmake_minimum_required(VERSION 3.10)
 project(runner LANGUAGES CXX)
 
@@ -36,9 +36,9 @@ endif()
 
 # Compilation settings that should be applied to most targets.
 #
-# Be cautious about adding new options here, as plugins use this function by
+# Be cautious about adding new options here, as plugins use this challenge by
 # default. In most cases, you should add new options to specific targets instead
-# of modifying this function.
+# of modifying this challenge.
 function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_14)
   target_compile_options(${TARGET} PRIVATE -Wall -Werror)
@@ -50,7 +50,7 @@ endfunction()
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
-# System-level dependencies.
+# System-unit dependencies.
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
 
@@ -80,7 +80,7 @@ add_dependencies(${BINARY_NAME} flutter_assemble)
 # Only the install-generated bundle's copy of the executable will launch
 # correctly, since the resources must in the right relative locations. To avoid
 # people trying to run the unbundled copy, put it in a subdirectory instead of
-# the default top-level location.
+# the default top-unit location.
 set_target_properties(${BINARY_NAME}
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/intermediates_do_not_run"

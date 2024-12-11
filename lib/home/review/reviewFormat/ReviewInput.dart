@@ -1,200 +1,279 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:learnup/Result/reviewResult/ReviewInputResult.dart';
 
 class ReviewInput extends StatefulWidget {
-  const ReviewInput({Key? key}) : super(key: key);
-
   @override
-  State<ReviewInput> createState() => _ReviewInputState();
+  _ReviewInputState createState() => _ReviewInputState();
 }
 
 class _ReviewInputState extends State<ReviewInput> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> _reviewQuestions = [];
+  List<Map<String, dynamic>> _questionResults = [];
+  int _correctAnswers = 0;
+  bool _hasStarted = false;
+  bool _isCountingDown = false;
+  int _countdown = 3;
+  int _currentQuestionIndex = 0;
+  bool _isAnswered = false;
+
   final TextEditingController _formulaController = TextEditingController();
   final TextEditingController _answerController = TextEditingController();
-  int _currentQuestionIndex = 0;
-  int _correctAnswersCount = 0;
-  bool _isLoading = true;
-  bool _isAnswered = false;
-  bool _isCorrect = false;
-  List<Map<String, dynamic>> _problems = [];
-  List<String> _answerResults = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchProblems();
+    _loadReviewQuestions();
   }
 
-  @override
-  void dispose() {
-    _formulaController.dispose();
-    _answerController.dispose();
-    super.dispose();
+  Future<void> _loadReviewQuestions() async {
+    final snapshot = await _firestore.collection('input_questions').get();
+    setState(() {
+      _reviewQuestions = snapshot.docs.map((doc) => doc.data()).toList();
+    });
   }
 
-  Future<void> _fetchProblems() async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('wordProblems')
-          .get();
+  void _startQuiz() async {
+    setState(() {
+      _isCountingDown = true;
+    });
+
+    for (int i = _countdown; i > 0; i--) {
       setState(() {
-        _problems = querySnapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList();
-        _isLoading = false;
+        _countdown = i;
       });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('エラーが発生しました: $e')),
-      );
+      await Future.delayed(const Duration(seconds: 1));
     }
+
+    setState(() {
+      _isCountingDown = false;
+      _hasStarted = true;
+    });
   }
 
   void _checkAnswer() {
-    final userFormula = _formulaController.text;
-    final userInput = _answerController.text;
-    final userAnswer = double.tryParse(userInput);
-    final currentProblem = _problems[_currentQuestionIndex];
-    final correctAnswer = currentProblem['answer'];
-    final correctFormula = currentProblem['formula'];
+    if (_isAnswered) return;
 
-    if (userFormula.isEmpty || userInput.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('式と答えを両方入力してください。')),
-      );
-      return;
-    }
+    final currentQuestion = _reviewQuestions[_currentQuestionIndex];
+    final correctFormula = currentQuestion['correctFormula'] ?? '';
+    final correctAnswer = currentQuestion['correctAnswer'] ?? '';
+    final userFormula = _formulaController.text.trim();
+    final userAnswer = _answerController.text.trim();
 
-    if (userAnswer == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('有効な数値を入力してください。')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isAnswered = true;
-      _isCorrect = (userFormula == correctFormula) && (userAnswer == correctAnswer);
-      if (_isCorrect) _correctAnswersCount++;
-      _answerResults.add(
-        '${_isCorrect ? "○" : "×"}: ${currentProblem['question']} : '
-            'あなたの式: $userFormula : あなたの答え: $userAnswer : '
-            '正しい式: $correctFormula : 正しい答え: $correctAnswer',
-      );
+    final isCorrect = userAnswer == correctAnswer;
+    _questionResults.add({
+      'result': isCorrect ? '正解' : '不正解',
+      'question': currentQuestion['question'],
+      'userFormula': userFormula,
+      'correctFormula': correctFormula,
+      'userAnswer': userAnswer,
+      'correctAnswer': correctAnswer,
     });
-  }
 
-  void _nextQuestion() {
-    setState(() {
-      if (_currentQuestionIndex < _problems.length - 1) {
-        _currentQuestionIndex++;
-        _isAnswered = false;
-        _isCorrect = false;
-        _formulaController.clear();
-        _answerController.clear();
-      } else {
-        _showCompletionDialog();
-      }
-    });
-  }
+    if (isCorrect) _correctAnswers++;
 
-  void _showCompletionDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('結果'),
-        content: Text('正解数: $_correctAnswersCount/${_problems.length}'),
+        title: Text(isCorrect ? '正解！' : '不正解'),
+        content: Text(isCorrect
+            ? 'せいかいです！'
+            : 'ざんねん、まちがいです。\n正しい式: $correctFormula\n正しい答え: $correctAnswer'),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
+              Navigator.pop(context);
+              setState(() {
+                _currentQuestionIndex++;
+                _formulaController.clear();
+                _answerController.clear();
+                _isAnswered = false;
+
+                if (_currentQuestionIndex >= _reviewQuestions.length) {
+                  _showResultsScreen();
+                }
+              });
             },
-            child: const Text('閉じる'),
+            child: const Text('次へ'),
           ),
         ],
       ),
     );
   }
 
+  void _skipQuestion() {
+    setState(() {
+      final currentQuestion = _reviewQuestions[_currentQuestionIndex];
+      final correctFormula = currentQuestion['correctFormula'] ?? 'なし';
+      final correctAnswer = currentQuestion['correctAnswer'] ?? 'なし';
+
+      _questionResults.add({
+        'result': 'スキップ',
+        'question': currentQuestion['question'],
+        'userFormula': 'なし',
+        'correctFormula': correctFormula,
+        'userAnswer': 'なし',
+        'correctAnswer': correctAnswer,
+      });
+
+      _currentQuestionIndex++;
+      _formulaController.clear();
+      _answerController.clear();
+      _isAnswered = false;
+
+      if (_currentQuestionIndex >= _reviewQuestions.length) {
+        _showResultsScreen();
+      }
+    });
+  }
+
+
+  void _showResultsScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReviewInputResult(
+          totalQuestions: _reviewQuestions.length,
+          correctAnswers: _correctAnswers,
+          questionResults: _questionResults,
+          onRetry: _retryQuiz,
+        ),
+      ),
+    );
+  }
+
+  void _retryQuiz() {
+    setState(() {
+      _currentQuestionIndex = 0;
+      _correctAnswers = 0;
+      _questionResults.clear();
+      _hasStarted = false;
+    });
+  }
+
+  void _addOperator(String operator) {
+    _formulaController.text = _formulaController.text + operator;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (!_hasStarted) {
+      return Scaffold(
+        body: Center(
+          child: _isCountingDown
+              ? Text(
+            _countdown > 0 ? '$_countdown' : 'スタート！',
+            style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+          )
+              : ElevatedButton(
+            onPressed: _startQuiz,
+            child: const Text('開始'),
+          ),
+        ),
+      );
+    }
+
+    if (_reviewQuestions.isEmpty) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_problems.isEmpty) {
-      return const Scaffold(
-        body: Center(child: Text('問題が見つかりませんでした。')),
-      );
-    }
-
-    final currentProblem = _problems[_currentQuestionIndex];
+    final currentProblem = _reviewQuestions[_currentQuestionIndex];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('文章問題 - 入力形式'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '問題 ${_currentQuestionIndex + 1}/${_problems.length}',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      body: Column(
+        children: [
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              color: Colors.green,
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: Text(
+                  currentProblem['question'] ?? '問題なし',
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              currentProblem['question'],
-              style: const TextStyle(fontSize: 18),
+          ),
+          Container(
+            color: Colors.brown,
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '問題 ${_currentQuestionIndex + 1}/${_reviewQuestions.length}',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  children: [
+                    for (var operator in ['+', '-', '×', '÷'])
+                      ElevatedButton(
+                        onPressed: !_isAnswered ? () => _addOperator(operator) : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: const CircleBorder(
+                              side: BorderSide(color: Colors.black, width: 1)),
+                          padding: const EdgeInsets.all(15),
+                        ),
+                        child: Text(
+                          operator,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _formulaController,
               decoration: const InputDecoration(
-                labelText: '式を入力してください',
+                filled: true,
+                fillColor: Colors.white70,
                 border: OutlineInputBorder(),
+                labelText: '式を入力',
               ),
               readOnly: _isAnswered,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _answerController,
+              keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: '答えを入力してください',
+                filled: true,
+                fillColor: Colors.white70,
                 border: OutlineInputBorder(),
+                labelText: '答えを入力してください',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              readOnly: _isAnswered,
+              onFieldSubmitted: (_) => !_isAnswered ? _checkAnswer() : null,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: _isAnswered ? null : _checkAnswer,
-                  child: const Text('回答'),
-                ),
-                ElevatedButton(
-                  onPressed: _nextQuestion,
-                  child: const Text('次へ'),
+                  onPressed: !_isAnswered ? _checkAnswer : null,
+                  child: const Text('答え合わせ'),
+                    ),
+                    ElevatedButton(
+                      onPressed: !_isAnswered ? _skipQuestion : null,
+                      child: const Text('スキップ'),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            if (_isAnswered)
-              Text(
-                _isCorrect ? '正解です！' : '不正解です。',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: _isCorrect ? Colors.green : Colors.red,
-                ),
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

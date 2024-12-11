@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../format/element/ChoiceScreen.dart';
 import '../../../../models/problem.dart';
-import '../../../../screens/ChoiceResultScreen.dart';
+import '../../../../Result/QuestionResults/ChoiceResultScreen.dart';
 
 class MultiplicationProblems extends StatefulWidget {
   final int selectedTable;

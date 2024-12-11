@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learnup/challenge/realtime/MatchRoom.dart';
 import 'HomeScreen.dart';
 import '../challenge/timeattack/choose.dart';
 
@@ -18,9 +19,12 @@ class ChallengeScreen extends StatelessWidget {
         },
       ),
       Challenge(
-        title: '算数',
+        title: '四則演算対戦',
         onPressed: () {
-          print("算数");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MatchRoomScreen()),
+          );
         },
       ),
     ];

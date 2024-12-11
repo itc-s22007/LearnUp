@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:learnup/unit/school%20year/4th/ApproximateNumber.dart';
+import 'package:learnup/unit/school%20year/4th/Parenthesis.dart';
+import 'package:learnup/unit/school%20year/4th/SentenceParenthesis.dart';
+import 'package:learnup/unit/school%20year/4th/fraction.dart';
 import 'school year/1st/Minus.dart';
 import 'school year/1st/Plus.dart';
 import 'school year/1st/SentenceMinus.dart';
@@ -13,6 +15,8 @@ import 'school year/3rd/multiplicative.dart';
 import 'school year/3rd/SentenceDivison.dart';
 import 'school year/3rd/remainder.dart';
 import 'school year/3rd/SentenceMultiplicative.dart';
+import 'school year/4th/ApproximateNumber.dart';
+import 'school year/4th/division2.dart';
 import '../models/problem.dart';
 import '../format/FormatScreen.dart';
 import 'package:learnup/unit/school%20year/1st/BlankMinus.dart' as bm;
@@ -156,17 +160,19 @@ class UnitScreen extends StatelessWidget {
         ];
       case '3年生':
         return [
-          Unit(title: '掛け算の計算', widget: const Multiplicative(), problems: []),
-          Unit(title: '割り算の計算', widget: const DivisionProblems(format: ''), problems: DivisionProblems.generateProblems()),
+          Unit(title: '掛け算', widget: const Multiplicative(), problems: []),
+          Unit(title: '割り算', widget: const DivisionProblems(format: ''), problems: DivisionProblems.generateProblems()),
           Unit(title: '割り算の余り', widget: const RemainderProblems(format: ''), problems: RemainderProblems.generateProblems()),
           Unit(title: '掛け算の文章問題', widget: const SentenceMultiplicative(format: ''), problems: SentenceMultiplicative.generateProblems()),
           Unit(title: '割り算の文章問題', widget: const SentenceDivide(format: ''), problems: SentenceDivide.generateProblems()),
-
         ];
       case '4年生':
         return [
-          Unit(title: 'がい数', widget: const RoundingProblems(format: ''), problems: RoundingProblems.generateProblems())
-
+          Unit(title: '割り算(２ケタ)', widget: const DivisionProblems2(format: ''), problems: DivisionProblems2.generateProblems()),
+          Unit(title: 'がい数', widget: const RoundingProblems(format: ''), problems: RoundingProblems.generateProblems()),
+          Unit(title: '(  )の計算', widget: const ParenthesisProblems(format: ''), problems: ParenthesisProblems.generateProblems()),
+          Unit(title: '(  )の文章問題', widget: const ParenthesisWordProblems(format: ''), problems: ParenthesisWordProblems.generateProblems()),
+          Unit(title: '分数', widget: const FractionAddition(), problems: FractionAddition.generateProblems())
         ];
       default:
         return [];

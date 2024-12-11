@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../screens/progress_screen.dart';
 import 'Profile.dart';
 import 'LevelScreen.dart';
-import '../screens/scoring_screen.dart';
 import 'review/Review.dart';
 import 'challenge.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,31 +17,137 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   String userName = "ユーザー名";
-  String userEmail = "example@example.com";
-
+  Set<DateTime> completedDays = {};
+  late CalendarFormat _calendarFormat;
+  late DateTime _selectedDay;
+  late DateTime _focusedDay;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-
+  int challengeCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadUserDetails();
+    _loadChallengeCount();
+    _calendarFormat = CalendarFormat.month;
+    _selectedDay = DateTime.now();
+    _focusedDay = DateTime.now();
+    _loadCompletedDays();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation =
+        Tween<double>(begin: 1.0, end: 1.2).animate(CurvedAnimation(
+          parent: _animationController,
+          curve: Curves.easeInOut,
+        ));
   }
 
-  Future<void> _loadUserDetails() async {
-    User? user = FirebaseAuth.instance.currentUser;
-
+  Future<void> _loadChallengeCount() async {
+    final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      setState(() {
+        challengeCount = doc.data()?['challengeCount'] ?? 0;
+      });
+    }
+  }
+
+  Future<void> _saveGoalCompletion(DateTime date) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DateTime dayOnly = DateTime(date.year, date.month, date.day);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('completedGoals')
+          .doc(dayOnly.toIso8601String()) // ドキュメントIDを日付に設定
+          .set({'date': dayOnly.toIso8601String()});
+      setState(() {
+        completedDays.add(dayOnly);
+      });
+    }
+  }
+
+  Future<void> _loadCompletedDays() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('completedGoals')
+          .get();
+      setState(() {
+        completedDays = doc.docs
+            .map((doc) => DateTime.parse(doc['date']))
+            .toSet();
+        completedDays.add(DateTime.now());
+      });
+    }
+  }
+  Widget _buildCalendar() {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "カレンダー",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          TableCalendar(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            locale: 'ja_JP',
+            calendarStyle: CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+            ),
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, day, events) {
+                bool isSameDay(DateTime date1, DateTime date2) {
+                  return date1.year == date2.year &&
+                      date1.month == date2.month &&
+                      date1.day == date2.day;
+                }
+                if (completedDays.any((completedDay) => isSameDay(completedDay, day))) {
+                  return const Icon(
+                    Icons.check_circle,
+                    color: Colors.red,
+                    size: 18,
+                  );
+                }
+                return null;
+              },
+            ),
+            selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+  Future<void> _loadUserDetails() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(
+          user.uid).get();
       setState(() {
         userName = doc.data()?['userName'] ?? "ユーザー名";
       });
@@ -51,225 +157,237 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: Colors.green[500],
-        child: Column(
-          children: [
-            GestureDetector(
-                onTapDown: (_) => _animationController.forward(),
-                onTapUp: (_) {
-                  _animationController.reverse();
-                  Future.delayed(const Duration(milliseconds: 150), () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                    );
-                    _loadUserDetails();
-                  });
-                },
-                onTapCancel: () => _animationController.reverse(),
-                child: AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: Container(
-                        color: Colors.green,
-                        padding: const EdgeInsets.all(20),
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  userName,
-                                  style: const TextStyle(
-                                    fontSize: 30,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+      appBar: AppBar(
+        title: const Text("ホーム"),
+        backgroundColor: Colors.green[500],
+      ),
+      drawer: _buildDrawer(),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Container(
+                color: Colors.green[500],
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTapDown: (_) => _animationController.forward(),
+                      onTapUp: (_) {
+                        _animationController.reverse();
+                        Future.delayed(const Duration(milliseconds: 150), () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ProfileScreen()),
+                          );
+                          _loadUserDetails();
+                        });
+                      },
+                      onTapCancel: () => _animationController.reverse(),
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _scaleAnimation.value,
+                            child: Container(
+                              padding: const EdgeInsets.all(20),
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        userName,
+                                        style: const TextStyle(
+                                          fontSize: 30,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                )
+                    ),
+                    _buildDailyGoals(),
+                    _buildCalendar(),
+                  ],
+                ),
+              ),
             ),
+          ),
+          Container(
+            color: Colors.brown,
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildMenuColumn('問題', Colors.white, LevelScreen(onLevelSelected: (selectedLevel) {})),
+                _buildMenuColumn('成績', Colors.pink, ProgressScreen()),
+                _buildMenuColumn('復習', Colors.yellow, ReviewScreen()),
+                _buildMenuColumn('挑戦', Colors.blue, const ChallengeScreen()),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            Expanded(
-              child: Stack(
+  Widget _buildDailyGoals() {
+    bool _isGoalAchieved = challengeCount >= 5;
+
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "今日の目標",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "現在の挑戦回数: $challengeCount 回",
+                style: const TextStyle(fontSize: 16),
+              ),
+              if (_isGoalAchieved)
+                const Icon(Icons.check_circle, color: Colors.green),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "問題モードで5個の単元に挑戦する",
+                style: TextStyle(fontSize: 16),
+              ),
+              Icon(
+                _isGoalAchieved ? Icons.check_circle : Icons.circle_outlined,
+                color: _isGoalAchieved ? Colors.green : Colors.grey,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuColumn(String title, Color color, Widget screen) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          title,
+
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => screen),
+            );
+          },
+          child: Container(
+            width: 80,
+            height: 30,
+            color: color,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: Colors.green[500]),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: double.infinity,
-                    color: Colors.green,
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    FirebaseAuth.instance.currentUser?.email ??
+                        "メールアドレス未設定",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Column(
-                  children: [
-                    const Text(
-                      '問題',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                LevelScreen(onLevelSelected: (selectedLevel) {}),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        color: Colors.white,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const Text(
-                      '成績',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ProgressScreen()),
-                        );
-                      },
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        color: Colors.pink,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const Text(
-                      '復習',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ReviewScreen()),
-                        );
-                      },
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        color: Colors.yellow,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const Text(
-                      '挑戦',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ChallengeScreen()),
-                        );
-                      },
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        color: Colors.blue,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const Text(
-                      'ホーム',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => print("ホームが押されました"),
-                      child: Column(
-                        children: [
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              width: 85,
-                              height: 20,
-                              color: Colors.black87,
-                              margin: const EdgeInsets.only(left: 10),
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                color: Colors.brown,
-                                width: 50,
-                                height: 30,
-                              ),
-                            ),
-                          ),
-                          Align(
-                            child: Container(
-                              width: 73,
-                              height: 7,
-                              margin: const EdgeInsets.only(left: 10),
-                              color: Colors.indigo,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Container(
-              color: Colors.brown,
-              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20)
-            ),
-          ],
-        ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('ホーム'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.account_circle),
+            title: const Text('プロフィール'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.assessment),
+            title: const Text('成績'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProgressScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('ログアウト'),
+            onTap: () {
+              FirebaseAuth.instance.signOut();
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
     );
   }

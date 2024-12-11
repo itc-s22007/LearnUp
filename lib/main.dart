@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:learnup/unit/school%20year/3rd/InequalitySign.dart';
+import 'package:learnup/users/loginScreen.dart';
 import 'firebase_options.dart';
 import 'home/HomeScreen.dart';
-import 'users/loginScreen.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,8 +21,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-
-      // home: const InequalitySign(format: '',),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja', ''), // 日本語
+        Locale('en', ''), // 英語
+      ],
+      locale: const Locale('ja', ''), // アプリ全体を日本語に設定
       home: const LoginScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),
@@ -32,4 +39,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
