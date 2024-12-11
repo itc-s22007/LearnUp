@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
-import '../../../screens/ChoiceResultScreen.dart';
+import '../../../Result/QuestionResults/ChoiceResultScreen.dart';
 
 class Plus1 extends StatefulWidget {
   const Plus1({Key? key, required String format}) : super(key: key);
@@ -17,7 +17,7 @@ class Plus1 extends StatefulWidget {
       final b = Random().nextInt(a);
 
       String question = '$a + $b = ?';
-      String formula = '$a + $b';
+      String formula = '$a' + '$b';
       double answer = a + b.toDouble();
 
       problems.add(Problem(question: question, answer: answer, isInputProblem: false, formula: formula));
@@ -43,7 +43,7 @@ class _Calculations1State extends State<Plus1> {
       final b = Random().nextInt(a);
 
       String question = '$a + $b = ?';
-      String formula = '$a + $b';
+      String formula = '$a' + '$b';
       double answer = a + b.toDouble();
 
       generatedProblems.add(Problem(question: question, formula: formula, answer: answer, isInputProblem: false));

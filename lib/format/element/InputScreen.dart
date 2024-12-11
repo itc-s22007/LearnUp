@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/problem.dart';
-import '../../screens/InputResultScreen.dart';
+import '../../Result/QuestionResults/InputResultScreen.dart';
 
 class InputScreen extends StatefulWidget {
   final List<Problem> problems;
@@ -23,7 +23,7 @@ class _InputScreenState extends State<InputScreen> {
   int _correctAnswersCount = 0;
   bool _isAnswered = false;
   bool _isCorrect = false;
-  List<String> _answerResults = [];
+  final List<String> _answerResults = [];
 
   @override
   void dispose() {
@@ -68,7 +68,6 @@ class _InputScreenState extends State<InputScreen> {
   void _skipQuestion() {
     final currentProblem = widget.problems[_currentQuestionIndex];
     final correctAnswer = currentProblem.answer;
-
 
     setState(() {
       _isAnswered = true;
@@ -141,6 +140,10 @@ class _InputScreenState extends State<InputScreen> {
     });
   }
 
+  void _addOperator(String operator) {
+    _formulaController.text = _formulaController.text + operator;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentProblem = widget.problems[_currentQuestionIndex];
@@ -167,9 +170,91 @@ class _InputScreenState extends State<InputScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '問題 ${_currentQuestionIndex + 1}/${widget.problems.length}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '問題 ${_currentQuestionIndex + 1}/${widget.problems.length}',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    // 四則演算ボタン
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: !_isAnswered ? () => _addOperator('+') : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: const CircleBorder(
+                              side: BorderSide(
+                                color: Colors.black,
+                                width: 1,
+                                style: BorderStyle.solid
+                              )
+                            ),
+                            padding: const EdgeInsets.all(15),
+                          ),
+                          child: const Text(
+                              '+',
+                            style: TextStyle(fontSize: 20),
+                          )
+                        ),
+                        ElevatedButton(
+                          onPressed: !_isAnswered ? () => _addOperator('-') : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: const CircleBorder(
+                              side: BorderSide(
+                                color: Colors.black,
+                                width: 1,
+                                style: BorderStyle.solid
+                              )
+                            ),
+                            padding: const EdgeInsets.all(15),
+                          ),
+                            child: const Text(
+                              '-',
+                              style: TextStyle(fontSize: 20),
+                            )
+                        ),
+                        ElevatedButton(
+                          onPressed: !_isAnswered ? () => _addOperator('×') : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: const CircleBorder(
+                              side: BorderSide(
+                                color: Colors.black,
+                                width: 1,
+                                style: BorderStyle.solid
+                              )
+                            ),
+                            padding: const EdgeInsets.all(15),
+                          ),
+                            child: const Text(
+                              '×',
+                              style: TextStyle(fontSize: 20),
+                            )
+                        ),
+                        ElevatedButton(
+                          onPressed: !_isAnswered ? () => _addOperator('÷') : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: const CircleBorder(
+                              side: BorderSide(
+                                color: Colors.black,
+                                width: 1,
+                                style: BorderStyle.solid
+                              )
+                            ),
+                            padding: const EdgeInsets.all(15),
+                          ),
+                            child: const Text(
+                              '÷',
+                              style: TextStyle(fontSize: 20),
+                            )
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

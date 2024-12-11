@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
-import '../../../screens/ChoiceResultScreen.dart';
+import '../../../Result/QuestionResults/ChoiceResultScreen.dart';
 
 class Minus1 extends StatefulWidget {
   const Minus1({Key? key, required String format}) : super(key: key);

@@ -1,0 +1,13 @@
+platform :ios, '10.0'
+
+target 'Runner' do
+  use_frameworks!
+  pod 'Firebase/Core'
+  pod 'Firebase/Auth'
+  pod 'Firebase/Firestore'
+  pod 'image_picker'  # 例として image_picker を追加
+  # 他の必要な pod を追加してください
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
+

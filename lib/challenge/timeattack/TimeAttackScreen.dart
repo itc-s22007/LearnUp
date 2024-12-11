@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
-import '../../screens/ChoiceResultScreen.dart';
+
+import '../../Result/QuestionResults/ChoiceResultScreen.dart';
 
 class TimeAttackScreen extends StatefulWidget {
   final String operation;
@@ -14,7 +15,7 @@ class TimeAttackScreen extends StatefulWidget {
   State<TimeAttackScreen> createState() => _TimeAttackScreenState();
 }
 
-class _TimeAttackScreenState extends State<TimeAttackScreen> {
+class _TimeAttackScreenState extends State<TimeAttackScreen> with SingleTickerProviderStateMixin {
   int currentScore = 0;
   int timeLeft = 30;
   int countdown = 3;
@@ -23,14 +24,25 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
   Timer? timer;
   Timer? countdownTimer;
   final Random random = Random();
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   bool isGameStarted = false;
 
   List<String> questionResults = [];
 
+  late AnimationController _animationController;
+  late Animation<double> _countdownAnimation;
+  late Animation<double> _questionAnimation;
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    _countdownAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _questionAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _startCountdown();
   }
 
@@ -39,6 +51,7 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
     timer?.cancel();
     countdownTimer?.cancel();
     _controller.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -61,6 +74,7 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
     });
     _generateQuestion();
     _startTimer();
+    _animationController.forward();
   }
 
   void _startTimer() {
@@ -98,6 +112,8 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
 
     userAnswer = '';
     _controller.clear();
+    _animationController.reset();
+    _animationController.forward();
   }
 
   void _checkAnswer() {
@@ -151,7 +167,6 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
       });
     }
 
-    // ResultsScreen に遷移
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -172,8 +187,6 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,45 +196,64 @@ class _TimeAttackScreenState extends State<TimeAttackScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Center(
-          child: isGameStarted
-              ? Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
+        child: isGameStarted
+            ? Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FadeTransition(
+              opacity: _questionAnimation,
+              child: Text(
                 '残り時間: $timeLeft 秒',
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              Text(
+            ),
+            FadeTransition(
+              opacity: _questionAnimation,
+              child: Text(
                 question,
                 style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
-              TextField(
-                controller: _controller,
-                onChanged: (value) {
-                  setState(() {
-                    userAnswer = value;
-                  });
-                },
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: '答えを入力してください',
+            ),
+            TextField(
+              controller: _controller,
+              onChanged: (value) {
+                setState(() {
+                  userAnswer = value;
+                });
+              },
+              onSubmitted: (_) {
+                _checkAnswer();
+              },
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: '答えを入力してください',
+              ),
+            ),
+            Text(
+              '得点: $currentScore',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ],
+        )
+            : Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FadeTransition(
+                opacity: _countdownAnimation,
+                child: Text(
+                  '$countdown',
+                  style: const TextStyle(
+                      fontSize: 80, fontWeight: FontWeight.bold),
                 ),
               ),
-              ElevatedButton(
-                onPressed: _checkAnswer,
-                child: const Text('解答'),
-              ),
-              Text(
-                '得点: $currentScore',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              const SizedBox(height: 20),
+              const Text(
+                '準備してください...',
+                style: TextStyle(fontSize: 20),
               ),
             ],
-          )
-              :Text(
-            '$countdown',
-            style: const TextStyle(fontSize: 80, fontWeight: FontWeight.bold),
           ),
         ),
       ),

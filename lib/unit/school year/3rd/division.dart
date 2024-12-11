@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
-import '../../../screens/ChoiceResultScreen.dart';
+import '../../../Result/QuestionResults/ChoiceResultScreen.dart';
 
 class DivisionProblems extends StatefulWidget {
   const DivisionProblems({Key? key, required String format}) : super(key: key);

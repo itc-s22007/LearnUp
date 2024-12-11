@@ -1,23 +1,9 @@
 import 'package:flutter/material.dart';
-import '../HomeScreen.dart';
+import 'package:learnup/home/HomeScreen.dart';
 import 'reviewFormat/ReviewChoice.dart';
 import 'reviewFormat/ReviewInput.dart';
 
-class ReviewScreen extends StatefulWidget {
-  const ReviewScreen({super.key});
-
-  @override
-  State<ReviewScreen> createState() => _ReviewScreenState();
-}
-
-class _ReviewScreenState extends State<ReviewScreen> {
-  void _navigateToHome() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-    );
-  }
-
+class ReviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,96 +13,98 @@ class _ReviewScreenState extends State<ReviewScreen> {
         color: Colors.green[500],
         child: Column(
           children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: Colors.green,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildFormatButton(
-                              context,
-                              '選択問題',
-                                  () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ReviewChoice(),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            _buildFormatButton(
-                              context,
-                              '入力問題',
-                                  () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ReviewInput(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            const Spacer(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(
-                  children: [
-                    const Text(
-                      'ホーム',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                      ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30),
+                  child: Text(
+                    'ここはあなたが保存した問題を選択する形式によってランダムで出題されます！',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    GestureDetector(
-                      onTap: _navigateToHome,
-                      child: Column(
-                        children: [
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              width: 85,
-                              height: 20,
-                              color: Colors.black87,
-                              margin: const EdgeInsets.only(left: 10),
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                color: Colors.brown,
-                                width: 50,
-                                height: 30,
-                              ),
-                            ),
-                          ),
-                          Align(
-                            child: Container(
-                              width: 73,
-                              height: 7,
-                              margin: const EdgeInsets.only(left: 10),
-                              color: Colors.indigo,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 50),
+                _buildFormatButton(
+                  context,
+                  '選択問題',
+                      () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ReviewChoice()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                _buildFormatButton(
+                  context,
+                  '入力問題',
+                      () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ReviewInput()),
+                    );
+                  },
                 ),
               ],
             ),
-            Container(
-              color: Colors.brown,
-              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+            const Spacer(), // 下部に余白を追加
+            Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeScreen(),
+                      ),
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          width: 85,
+                          height: 20,
+                          color: Colors.black87,
+                          margin: const EdgeInsets.only(right: 5),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            color: Colors.brown,
+                            width: 50,
+                            height: 30,
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          width: 73,
+                          height: 7,
+                          margin: const EdgeInsets.only(right: 10),
+                          color: Colors.indigo,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: double.infinity,
+                  height: 50, // 茶色い部分に固定高さを設定
+                  color: Colors.brown,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    "",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -124,13 +112,30 @@ class _ReviewScreenState extends State<ReviewScreen> {
     );
   }
 
-  Widget _buildFormatButton(
-      BuildContext context, String title, VoidCallback onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        child: Text(title),
+  Widget _buildFormatButton(BuildContext context, String title, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Center(
+          child: Container(
+            width: 250,
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
       ),
     );
   }
