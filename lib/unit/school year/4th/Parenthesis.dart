@@ -13,25 +13,21 @@ class ParenthesisProblems extends StatefulWidget {
   static List<Problem> generateProblems() {
     List<Problem> problems = [];
     for (int i = 0; i < 10; i++) {
-      // ランダムな数字を生成
-      int a = Random().nextInt(9) + 1; // 1～9
-      int b = Random().nextInt(9) + 1; // 1～9
-      int c = Random().nextInt(9) + 1; // 1～9
+      int a = Random().nextInt(9) + 1;
+      int b = Random().nextInt(9) + 1;
+      int c = Random().nextInt(9) + 1;
 
-      // ランダムに括弧の位置を決定
-      int randomPattern = Random().nextInt(2); // 0または1
+      int randomPattern = Random().nextInt(2);
 
       String question;
       String formula;
       double answer;
 
       if (randomPattern == 0) {
-        // パターン1: (a + b) * c
         question = "(${a} + ${b}) × ${c} = ?";
         formula = "(${a} + ${b}) * ${c}";
         answer = (a + b) * c.toDouble();
       } else {
-        // パターン2: a + (b * c)
         question = "${a} + (${b} × ${c}) = ?";
         formula = "${a} + (${b} * ${c})";
         answer = a + (b * c).toDouble();
@@ -41,7 +37,7 @@ class ParenthesisProblems extends StatefulWidget {
         question: question,
         formula: formula,
         answer: answer,
-        isInputProblem: false, // 選択肢形式
+        isInputProblem: false,
       ));
     }
     return problems;

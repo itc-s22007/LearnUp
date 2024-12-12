@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:learnup/Result/reviewResult/ReviewInputResult.dart';
 
+import '../../../models/problem.dart';
+
 class ReviewInput extends StatefulWidget {
   @override
   _ReviewInputState createState() => _ReviewInputState();
@@ -18,6 +20,11 @@ class _ReviewInputState extends State<ReviewInput> {
   int _currentQuestionIndex = 0;
   bool _isAnswered = false;
 
+
+  String _userFormula = "";
+  String _userAnswer = "";
+  bool _isFormulaMode = true;
+
   final TextEditingController _formulaController = TextEditingController();
   final TextEditingController _answerController = TextEditingController();
 
@@ -33,6 +40,62 @@ class _ReviewInputState extends State<ReviewInput> {
       _reviewQuestions = snapshot.docs.map((doc) => doc.data()).toList();
     });
   }
+
+  void _addInput(String value) {
+    if (!_isAnswered) {
+      setState(() {
+        if (_isFormulaMode) {
+          _userFormula += value;
+        } else {
+          _userAnswer += value;
+        }
+      });
+    }
+  }
+
+  void _clearInput() {
+    if (!_isAnswered) {
+      setState(() {
+        if (_isFormulaMode) {
+          _userFormula = "";
+        } else {
+          _userAnswer = "";
+        }
+      });
+    }
+  }
+
+  void _toggleInputMode() {
+    setState(() {
+      _isFormulaMode = !_isFormulaMode;
+    });
+  }
+
+
+  void _addToFormula(String value) {
+    if (!_isAnswered) {
+      setState(() {
+        _userFormula += value;
+      });
+    }
+  }
+
+  void _clearFormula() {
+    if (!_isAnswered) {
+      setState(() {
+        _userFormula = "";
+      });
+    }
+  }
+
+  void _addAnswer(String value) {
+    if (!_isAnswered) {
+      setState(() {
+        _userAnswer = value;
+      });
+    }
+  }
+
 
   void _startQuiz() async {
     setState(() {
@@ -204,68 +267,87 @@ class _ReviewInputState extends State<ReviewInput> {
             color: Colors.brown,
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '問題 ${_currentQuestionIndex + 1}/${_reviewQuestions.length}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  children: [
-                    for (var operator in ['+', '-', '×', '÷'])
-                      ElevatedButton(
-                        onPressed: !_isAnswered ? () => _addOperator(operator) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: const CircleBorder(
-                              side: BorderSide(color: Colors.black, width: 1)),
-                          padding: const EdgeInsets.all(15),
-                        ),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // 式
+                      Text(
+                        '式: $_userFormula',
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      const SizedBox(width: 20),
+                      // 答え
+                      Container(
+                        width: 100, // 固定幅を設定
+                        alignment: Alignment.center, // 中央揃え
                         child: Text(
-                          operator,
-                          style: const TextStyle(fontSize: 20),
+                          '答え: $_userAnswer',
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _formulaController,
-              decoration: const InputDecoration(
-                filled: true,
-                fillColor: Colors.white70,
-                border: OutlineInputBorder(),
-                labelText: '式を入力',
-              ),
-              readOnly: _isAnswered,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _answerController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                filled: true,
-                fillColor: Colors.white70,
-                border: OutlineInputBorder(),
-                labelText: '答えを入力してください',
-              ),
-              onFieldSubmitted: (_) => !_isAnswered ? _checkAnswer() : null,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: !_isAnswered ? _checkAnswer : null,
-                  child: const Text('答え合わせ'),
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (int i = 0; i <= 9; i++)
+                      ElevatedButton(
+                        onPressed: () => _addInput(i.toString()),
+                        child: Text(
+                            i.toString(), style: const TextStyle(fontSize: 20)),
+                      ),
+                    ElevatedButton(
+                      onPressed: () => _addInput('+'),
+                      child: const Text('+', style: TextStyle(fontSize: 20)),
                     ),
                     ElevatedButton(
-                      onPressed: !_isAnswered ? _skipQuestion : null,
+                      onPressed: () => _addInput('-'),
+                      child: const Text('-', style: TextStyle(fontSize: 20)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _addInput('×'),
+                      child: const Text('×', style: TextStyle(fontSize: 20)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _addInput('÷'),
+                      child: const Text('÷', style: TextStyle(fontSize: 20)),
+                    ),
+                    ElevatedButton(
+                      onPressed: _clearInput,
+                      child: const Text('クリア', style: TextStyle(fontSize: 20)),
+                    ),
+                    ElevatedButton(
+                      onPressed: _toggleInputMode,
+                      child: Text(
+                        _isFormulaMode ? '現在: 式' : '現在: 答え',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _isAnswered ? null : _checkAnswer,
+                      child: const Text('回答'),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: _isAnswered ? null : _skipQuestion,
                       child: const Text('スキップ'),
                     ),
                   ],

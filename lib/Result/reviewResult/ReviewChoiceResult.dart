@@ -30,7 +30,6 @@ class _ReviewChoiceResultState extends State<ReviewChoiceResult> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // 成績表示部分
             Container(
               padding: const EdgeInsets.all(50),
               decoration: BoxDecoration(

@@ -17,36 +17,58 @@ class InputScreen extends StatefulWidget {
 }
 
 class _InputScreenState extends State<InputScreen> {
-  final TextEditingController _formulaController = TextEditingController();
-  final TextEditingController _answerController = TextEditingController();
   int _currentQuestionIndex = 0;
   int _correctAnswersCount = 0;
   bool _isAnswered = false;
   bool _isCorrect = false;
   final List<String> _answerResults = [];
+  String _userFormula = "";
+  String _userAnswer = "";
+  bool _isFormulaMode = true;
 
-  @override
-  void dispose() {
-    _formulaController.dispose();
-    _answerController.dispose();
-    super.dispose();
+  void _addInput(String value) {
+    if (!_isAnswered) {
+      setState(() {
+        if (_isFormulaMode) {
+          _userFormula += value;
+        } else {
+          _userAnswer += value;
+        }
+      });
+    }
+  }
+
+  void _clearInput() {
+    if (!_isAnswered) {
+      setState(() {
+        if (_isFormulaMode) {
+          _userFormula = "";
+        } else {
+          _userAnswer = "";
+        }
+      });
+    }
+  }
+
+  void _toggleInputMode() {
+    setState(() {
+      _isFormulaMode = !_isFormulaMode;
+    });
   }
 
   void _checkAnswer() {
-    final userFormula = _formulaController.text;
-    final userInput = _answerController.text;
-    final userAnswer = double.tryParse(userInput);
     final currentProblem = widget.problems[_currentQuestionIndex];
     final correctAnswer = currentProblem.answer;
 
-    if (userFormula.isEmpty || userInput.isEmpty) {
+    if (_userFormula.isEmpty || _userAnswer.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('式と答えを両方入力してください。')),
       );
       return;
     }
 
-    if (userAnswer == null) {
+    final userAnswerDouble = double.tryParse(_userAnswer);
+    if (userAnswerDouble == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('有効な数値を入力してください。')),
       );
@@ -55,14 +77,19 @@ class _InputScreenState extends State<InputScreen> {
 
     setState(() {
       _isAnswered = true;
-      _isCorrect = (userFormula == currentProblem.formula) && (userAnswer == correctAnswer);
+      _isCorrect = (_userFormula == currentProblem.formula) &&
+          (userAnswerDouble == correctAnswer);
       if (_isCorrect) _correctAnswersCount++;
       _answerResults.add(
-          '${_isCorrect ? "○" : "×"}: ${currentProblem.question} : あなたの式: $userFormula : あなたの答え: $userAnswer : 正しい式: ${currentProblem.formula} : 正しい答え: $correctAnswer');
+        '${_isCorrect ? "○" : "×"}: ${currentProblem
+            .question} : あなたの式: $_userFormula : あなたの答え: $_userAnswer : 正しい式: ${currentProblem
+            .formula} : 正しい答え: $correctAnswer',
+      );
     });
 
-    widget.onAnswerEntered(currentProblem, userFormula, userAnswer);
-    _showResultDialog(_isCorrect, correctAnswer, userAnswer, userFormula: userFormula);
+    widget.onAnswerEntered(
+        currentProblem, _userFormula, double.parse(_userAnswer));
+    _showResultDialog(_isCorrect, correctAnswer, double.tryParse(_userAnswer));
   }
 
   void _skipQuestion() {
@@ -73,44 +100,49 @@ class _InputScreenState extends State<InputScreen> {
       _isAnswered = true;
       _isCorrect = false;
       _answerResults.add(
-          '${_isCorrect ? "○" : "×"}: ${currentProblem.question} : あなたの式:  スキップ  : あなたの答え: 　スキップ　 : 正しい式: ${currentProblem.formula} : 正しい答え: $correctAnswer'
+        '${_isCorrect ? "○" : "×"}: ${currentProblem
+            .question} : あなたの式:  スキップ  : あなたの答え: 　スキップ　 : 正しい式: ${currentProblem
+            .formula} : 正しい答え: $correctAnswer',
       );
     });
 
-    _showResultDialog(false, correctAnswer, null, userFormula: null);
+    _showResultDialog(false, correctAnswer, null, skipped: true);
   }
 
-  void _showResultDialog(bool isCorrect, double correctAnswer, double? userAnswer, {String? userFormula}) {
+  void _showResultDialog(bool isCorrect, double correctAnswer,
+      double? userAnswer, {bool skipped = false}) {
     final correctFormula = widget.problems[_currentQuestionIndex].formula;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isCorrect ? '正解！' : '不正解'),
-        content: Text(isCorrect
-            ? 'おめでとうございます！正解です。'
-            : '残念！\n正しい式: $correctFormula\n正しい答え: $correctAnswer'
-            '${userFormula != null ? "\nあなたの式: $userFormula" : ""}'
-            '${userAnswer != null ? "\nあなたの答え: $userAnswer" : ""}'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (_currentQuestionIndex < widget.problems.length - 1) {
-                setState(() {
-                  _currentQuestionIndex++;
-                  _isAnswered = false;
-                  _isCorrect = false;
-                  _formulaController.clear();
-                  _answerController.clear();
-                });
-              } else {
-                _showCompletionDialog();
-              }
-            },
-            child: const Text('次へ'),
+      builder: (context) =>
+          AlertDialog(
+            title: Text(
+                isCorrect ? '正解！' : skipped ? 'スキップしました' : '不正解'),
+            content: Text(skipped
+                ? 'スキップしました。\n正しい式: $correctFormula\n正しい答え: $correctAnswer'
+                : isCorrect
+                ? 'おめでとうございます！正解です。'
+                : '残念！\n正しい式: $correctFormula\n正しい答え: $correctAnswer\nあなたの式: $_userFormula\nあなたの答え: $userAnswer'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  if (_currentQuestionIndex < widget.problems.length - 1) {
+                    setState(() {
+                      _currentQuestionIndex++;
+                      _isAnswered = false;
+                      _isCorrect = false;
+                      _userFormula = "";
+                      _userAnswer = "";
+                    });
+                  } else {
+                    _showCompletionDialog();
+                  }
+                },
+                child: const Text('次へ'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -118,12 +150,13 @@ class _InputScreenState extends State<InputScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => InputResultsScreen(
-          totalQuestions: widget.problems.length,
-          correctAnswers: _correctAnswersCount,
-          questionResults: _answerResults,
-          onRetry: _retryQuiz,
-        ),
+        builder: (context) =>
+            InputResultsScreen(
+              totalQuestions: widget.problems.length,
+              correctAnswers: _correctAnswersCount,
+              questionResults: _answerResults,
+              onRetry: _retryQuiz,
+            ),
       ),
     );
   }
@@ -135,13 +168,9 @@ class _InputScreenState extends State<InputScreen> {
       _isAnswered = false;
       _isCorrect = false;
       _answerResults.clear();
-      _formulaController.clear();
-      _answerController.clear();
+      _userFormula = "";
+      _userAnswer = "";
     });
-  }
-
-  void _addOperator(String operator) {
-    _formulaController.text = _formulaController.text + operator;
   }
 
   @override
@@ -155,12 +184,22 @@ class _InputScreenState extends State<InputScreen> {
               width: double.infinity,
               color: Colors.green,
               padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Text(
-                  currentProblem.question,
-                  style: const TextStyle(fontSize: 20, color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '問題 ${_currentQuestionIndex + 1}/${widget.problems.length}',
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  const SizedBox(height: 10),
+                  // 問題のテキスト
+                  Text(
+                    currentProblem.question,
+                    style: const TextStyle(fontSize: 20, color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),
@@ -168,120 +207,75 @@ class _InputScreenState extends State<InputScreen> {
             color: Colors.brown,
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // 式
+                      Text(
+                        '式: $_userFormula',
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      const SizedBox(width: 20),
+                      // 答え
+                      Container(
+                        width: 100, // 固定幅を設定
+                        alignment: Alignment.center, // 中央揃え
+                        child: Text(
+                          '答え: $_userAnswer',
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
                   children: [
-                    Text(
-                      '問題 ${_currentQuestionIndex + 1}/${widget.problems.length}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    for (int i = 0; i <= 9; i++)
+                      ElevatedButton(
+                        onPressed: () => _addInput(i.toString()),
+                        child: Text(
+                            i.toString(), style: const TextStyle(fontSize: 20)),
+                      ),
+                    ElevatedButton(
+                      onPressed: () => _addInput('+'),
+                      child: const Text('+', style: TextStyle(fontSize: 20)),
                     ),
-                    // 四則演算ボタン
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: !_isAnswered ? () => _addOperator('+') : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: const CircleBorder(
-                              side: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                                style: BorderStyle.solid
-                              )
-                            ),
-                            padding: const EdgeInsets.all(15),
-                          ),
-                          child: const Text(
-                              '+',
-                            style: TextStyle(fontSize: 20),
-                          )
-                        ),
-                        ElevatedButton(
-                          onPressed: !_isAnswered ? () => _addOperator('-') : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: const CircleBorder(
-                              side: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                                style: BorderStyle.solid
-                              )
-                            ),
-                            padding: const EdgeInsets.all(15),
-                          ),
-                            child: const Text(
-                              '-',
-                              style: TextStyle(fontSize: 20),
-                            )
-                        ),
-                        ElevatedButton(
-                          onPressed: !_isAnswered ? () => _addOperator('×') : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: const CircleBorder(
-                              side: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                                style: BorderStyle.solid
-                              )
-                            ),
-                            padding: const EdgeInsets.all(15),
-                          ),
-                            child: const Text(
-                              '×',
-                              style: TextStyle(fontSize: 20),
-                            )
-                        ),
-                        ElevatedButton(
-                          onPressed: !_isAnswered ? () => _addOperator('÷') : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: const CircleBorder(
-                              side: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                                style: BorderStyle.solid
-                              )
-                            ),
-                            padding: const EdgeInsets.all(15),
-                          ),
-                            child: const Text(
-                              '÷',
-                              style: TextStyle(fontSize: 20),
-                            )
-                        ),
-                      ],
+                    ElevatedButton(
+                      onPressed: () => _addInput('-'),
+                      child: const Text('-', style: TextStyle(fontSize: 20)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _addInput('×'),
+                      child: const Text('×', style: TextStyle(fontSize: 20)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _addInput('÷'),
+                      child: const Text('÷', style: TextStyle(fontSize: 20)),
+                    ),
+                    ElevatedButton(
+                      onPressed: _clearInput,
+                      child: const Text('クリア', style: TextStyle(fontSize: 20)),
+                    ),
+                    ElevatedButton(
+                      onPressed: _toggleInputMode,
+                      child: Text(
+                        _isFormulaMode ? '現在: 式' : '現在: 答え',
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _formulaController,
-                  decoration: const InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white70,
-                    border: OutlineInputBorder(),
-                    labelText: '式を入力',
-                  ),
-                  keyboardType: TextInputType.text,
-                  style: const TextStyle(fontSize: 20),
-                  readOnly: _isAnswered,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _answerController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white70,
-                    border: OutlineInputBorder(),
-                    labelText: '答えを入力してください',
-                  ),
-                  style: const TextStyle(fontSize: 20),
-                  readOnly: _isAnswered,
-                  onFieldSubmitted: (_) => !_isAnswered ? _checkAnswer() : null,
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -298,7 +292,6 @@ class _InputScreenState extends State<InputScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
               ],
             ),
           ),

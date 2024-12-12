@@ -39,11 +39,52 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
 
           if (currentPlayers == 2) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RealTimeBattleScreen(roomId: widget.roomId, isHost: widget.isHost),
-                ),
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  int countdown = 3;
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      Future.delayed(const Duration(seconds: 1), () {
+                        if (countdown > 1) {
+                          setState(() => countdown--);
+                        } else {
+                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RealTimeBattleScreen(
+                                roomId: widget.roomId,
+                                isHost: widget.isHost,
+                              ),
+                            ),
+                          );
+                        }
+                      });
+                      return AlertDialog(
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              '試合開始までお待ちください',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              '$countdown',
+                              style: const TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
               );
             });
           }

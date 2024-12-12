@@ -16,7 +16,7 @@ class DivisionProblems extends StatefulWidget {
       final b = Random().nextInt(9) + 1;
       final a = b * (Random().nextInt(10) + 1);
 
-      String question = '$a ÷ $b = ?';
+      String question = '$a÷$b = ?';
       String formula = '$a / $b';
       double answer = a / b.toDouble();
 

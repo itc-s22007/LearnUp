@@ -16,8 +16,8 @@ class RemainderProblems extends StatefulWidget {
       final b = Random().nextInt(9) + 1;
       final a = Random().nextInt(90) + 10;
 
-      String question = '$a ÷ $b のあまりは？';
-      String formula = '$a % $b';
+      String question = '$a÷$b のあまりは？';
+      String formula = '$a%$b';
 
       int remainder = a % b;
 

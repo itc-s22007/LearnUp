@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'Question/ProblemProvider.dart';
+import 'RealTimeResult.dart';
 
 class RealTimeBattleScreen extends StatefulWidget {
   final String roomId;
@@ -18,7 +18,7 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
   final ProblemProvider _problemProvider = ProblemProvider();
   List<String> questions = [];
   List<int> answers = [];
-  int currentQuestionIndex = 0;
+  int currentQuestionIndex = 19;
   String userAnswer = '';
   String opponentProgress = '0/20';
   late CollectionReference battleRoom;
@@ -30,11 +30,15 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
     _initializeGame();
 
     battleRoom.doc(widget.roomId).snapshots().listen((snapshot) {
-      final data = snapshot.data() as Map<String, dynamic>;
+      final data = snapshot.data() as Map<String, dynamic>?;
       if (data != null) {
         setState(() {
           opponentProgress = '${data['player2']?['progress'] ?? 0}/20';
         });
+
+        if ((data['player1']?['progress'] ?? 0) >= 20 || (data['player2']?['progress'] ?? 0) >= 20) {
+          _showGameEndAnimation();
+        }
       }
     });
   }
@@ -64,19 +68,62 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
         answers = List<int>.from(roomData['answers']);
       });
     }
-
-    battleRoom.doc(widget.roomId).snapshots().listen((snapshot) {
-      final data = snapshot.data() as Map<String, dynamic>;
-      if (data != null) {
-        setState(() {
-          opponentProgress = '${data['player2']?['progress'] ?? 0}/20';
-        });
-      }
-    });
   }
 
-
   void _submitAnswer() {
+    if (userAnswer.isEmpty) return;
+
+    final int? parsedAnswer = int.tryParse(userAnswer);
+    if (parsedAnswer == answers[currentQuestionIndex]) {
+      setState(() {
+        currentQuestionIndex++;
+        userAnswer = '';
+      });
+
+      battleRoom.doc(widget.roomId).update({
+        'player1.progress': currentQuestionIndex,
+      });
+
+      if (currentQuestionIndex >= questions.length) {
+        _showGameEndAnimation();
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('不正解です。もう一度挑戦してください。')),
+      );
+    }
+  }
+
+  void _showGameEndAnimation() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Center(
+        child: Container(
+          color: Colors.black.withOpacity(0.7),
+          child: const Center(
+            child: Text(
+              '終了',
+              style: TextStyle(
+                fontSize: 50,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pop(context); // Remove the animation dialog
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RealTimeResultScreen(roomId: widget.roomId, isHost: widget.isHost,),
+        ),
+      );
+    });
   }
 
   @override
@@ -124,20 +171,6 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
               ),
             ),
 
-            ElevatedButton(
-              onPressed: _submitAnswer,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                '回答',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-
             questions.isNotEmpty
                 ? Text(
               'あなたの進捗: ${currentQuestionIndex + 1}/${questions.length}',
@@ -150,3 +183,4 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
     );
   }
 }
+
