@@ -31,7 +31,7 @@ class SentenceDivide extends StatefulWidget {
           .replaceAll('{b}', b.toString());
 
       double answer = (a / b).toDouble();
-      String formula = '$a ÷ $b';
+      String formula = '$a÷$b';
 
       generatedProblems.add(Problem(
         question: question,

@@ -35,7 +35,7 @@ class ParenthesisWordProblems extends StatefulWidget {
           .replaceAll("{a}", a.toString())
           .replaceAll("{b}", b.toString())
           .replaceAll("{c}", c.toString());
-      String formula = "($a × $b) + $c";
+      String formula = "($a×$b) + $c";
       double answer = (a * b) + c.toDouble();
 
       problems.add(Problem(

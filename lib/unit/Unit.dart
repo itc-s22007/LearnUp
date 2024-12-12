@@ -48,11 +48,7 @@ class UnitScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
-                      if (units[index].title == '掛け算の計算') {
-                        _navigateToMultiplicativeScreen(context);
-                      } else {
                         _navigateToFormatScreen(context, units[index]);
-                      }
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
@@ -130,14 +126,6 @@ class UnitScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToMultiplicativeScreen(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const Multiplicative(),
-      ),
-    );
-  }
 
   List<Unit> _getUnitsForGrade(String grade) {
     switch (grade) {
@@ -160,7 +148,7 @@ class UnitScreen extends StatelessWidget {
         ];
       case '3年生':
         return [
-          Unit(title: '掛け算', widget: const Multiplicative(), problems: []),
+          Unit(title: '掛け算', widget: const Multiplicative(format: '',), problems: Multiplicative.generateProblems()),
           Unit(title: '割り算', widget: const DivisionProblems(format: ''), problems: DivisionProblems.generateProblems()),
           Unit(title: '割り算の余り', widget: const RemainderProblems(format: ''), problems: RemainderProblems.generateProblems()),
           Unit(title: '掛け算の文章問題', widget: const SentenceMultiplicative(format: ''), problems: SentenceMultiplicative.generateProblems()),

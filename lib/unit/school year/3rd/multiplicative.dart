@@ -1,157 +1,85 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
+import '../../../format/element/ChoiceScreen.dart';
 import '../../../models/problem.dart';
-import '../../../format/FormatScreen.dart';
-import '../../Unit.dart';
+import '../../../Result/QuestionResults/ChoiceResultScreen.dart';
 
-class Multiplicative extends StatelessWidget {
-  const Multiplicative({Key? key}) : super(key: key);
+class Multiplicative extends StatefulWidget {
+  const Multiplicative({Key? key, required String format}) : super(key: key);
 
-  void _navigateToFormatScreen(BuildContext context, int table) {
-    final problems = _generateMultiplicationProblems(table);
+  @override
+  State<Multiplicative> createState() => _DivisionProblemsState();
+
+  static List<Problem> generateProblems() {
+    List<Problem> problems = [];
+    for (int i = 0; i < 10; i++) {
+      final b = Random().nextInt(9) + 1;
+      final a = b * (Random().nextInt(10) + 1);
+
+      String question = '$a×$b = ?';
+      String formula = '$a*$b';
+      double answer = a / b.toDouble();
+
+      problems.add(Problem(question: question, answer: answer, isInputProblem: false, formula: formula));
+    }
+    return problems;
+  }
+}
+
+class _DivisionProblemsState extends State<Multiplicative> {
+  List<Problem> _problems = [];
+  int _correctAnswers = 0;
+
+  void _generateProblems() async {
+    setState(() {
+    });
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    List<Problem> generatedProblems = Multiplicative.generateProblems();
+
+    setState(() {
+      _problems = generatedProblems;
+    });
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FormatScreen(
-          unit: Unit(
-            title: '$table の段の掛け算',
-            widget: const Multiplicative(),
-            problems: problems,
-          ),
-          problems: problems,
+        builder: (context) => ChoiceScreen(
+          problems: _problems,
+          onAnswerSelected: _handleAnswerSelected,
+          unit: null,
+          onAnswerEntered: (Problem problem, double userAnswer) {},
         ),
       ),
     );
   }
 
-  List<Problem> _generateMultiplicationProblems(int table) {
-    return List.generate(10, (index) {
-      final multiplier = index + 1;
-      final answer = table * multiplier;
-      final formula = '$table × $multiplier';
+  void _handleAnswerSelected(Problem problem, double userAnswer) {
+    if (problem.answer == userAnswer) {
+      _correctAnswers++;
+    }
 
-      return Problem(
-        question: '$table × $multiplier',
-        answer: answer.toDouble(),
-        formula: formula,
-        isInputProblem: false,
+    int currentIndex = _problems.indexOf(problem);
+    if (currentIndex >= 0 && currentIndex == _problems.length - 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChoiceResultsScreen(
+            correctAnswers: _correctAnswers,
+            totalQuestions: _problems.length,
+            questionResults: const [],
+            onRetry: () {},
+          ),
+        ),
       );
-    });
+    }
   }
-
   @override
   Widget build(BuildContext context) {
-    final List<int> tables = List.generate(9, (index) => index + 1);
-    final List<int> leftTables = tables.where((table) => table % 2 != 0).toList();
-    final List<int> rightTables = tables.where((table) => table % 2 == 0).toList();
-
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: Colors.green[500],
-        child: Column(
-          children: [
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: leftTables.map((table) {
-                        return GestureDetector(
-                          onTap: () => _navigateToFormatScreen(context, table),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Transform.rotate(
-                              angle: -0.2,
-                              child: Text(
-                                '$table の段',
-                                style: const TextStyle(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: rightTables.map((table) {
-                        return GestureDetector(
-                          onTap: () => _navigateToFormatScreen(context, table),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Transform.rotate(
-                              angle: -0.2,
-                              child: Text(
-                                '$table の段',
-                                style: const TextStyle(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          width: 85,
-                          height: 20,
-                          color: Colors.black87,
-                          margin: const EdgeInsets.only(left: 10),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            color: Colors.brown,
-                            width: 50,
-                            height: 30,
-                          ),
-                        ),
-                      ),
-                      Align(
-                        child: Container(
-                          width: 73,
-                          height: 7,
-                          margin: const EdgeInsets.only(left: 10),
-                          color: Colors.indigo,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              color: Colors.brown,
-              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-            ),
-          ],
-        ),
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
       ),
     );
   }

@@ -20,7 +20,6 @@ class FractionAddition extends StatefulWidget {
       int numerator2 = rand.nextInt(9) + 1;
       int denominator2 = rand.nextInt(9) + 1;
 
-      // 通分して分数を足し算
       int lcm = denominator1 * denominator2; // 分母の最小公倍数（簡略化）
       int adjustedNumerator1 = numerator1 * (lcm ~/ denominator1);
       int adjustedNumerator2 = numerator2 * (lcm ~/ denominator2);
