@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:learnup/challenge/realtime/MatchRoom.dart';
+import 'package:learnup/challenge/realtime/CalculationBattle/MatchRoom.dart';
 import 'HomeScreen.dart';
-import '../challenge/timeattack/choose.dart';
+import '../challenge/minigame/timeattack/choose.dart';
 
 class ChallengeScreen extends StatelessWidget {
   const ChallengeScreen({super.key});

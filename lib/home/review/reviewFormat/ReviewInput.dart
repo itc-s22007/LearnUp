@@ -139,31 +139,34 @@ class _ReviewInputState extends State<ReviewInput> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(isCorrect ? '正解！' : '不正解'),
-        content: Text(isCorrect
-            ? 'せいかいです！'
-            : 'ざんねん、まちがいです。\n正しい式: $correctFormula\n正しい答え: $correctAnswer'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _currentQuestionIndex++;
-                _formulaController.clear();
-                _answerController.clear();
-                _isAnswered = false;
-
-                if (_currentQuestionIndex >= _reviewQuestions.length) {
-                  _showResultsScreen();
-                }
-              });
-            },
-            child: const Text('次へ'),
-          ),
-        ],
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          title: Text(isCorrect ? '正解！' : '不正解'),
+          content: Text(isCorrect
+              ? 'せいかいです！'
+              : 'ざんねん、まちがいです。\n正しい式: $correctFormula\n正しい答え: $correctAnswer'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _currentQuestionIndex++;
+                  _formulaController.clear();
+                  _answerController.clear();
+                  _isAnswered = false;
+                  if (_currentQuestionIndex >= _reviewQuestions.length) {
+                    _showResultsScreen();
+                  }
+                });
+              },
+              child: const Text('次へ'),
+            ),
+          ],
+        ),
       ),
     );
+
   }
 
   void _skipQuestion() {

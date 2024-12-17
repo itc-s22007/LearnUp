@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../home/challenge.dart';
-import '../rank.dart';
+import 'rank.dart';
 import 'TimeAttackScreen.dart';
 import 'choose.dart';
 

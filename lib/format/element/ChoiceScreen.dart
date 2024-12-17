@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learnup/unit/Unit.dart';
+import '../../home/LevelScreen.dart';
 import '../../models/problem.dart';
 import 'dart:math';
 import '../../Result/QuestionResults/ChoiceResultScreen.dart';
@@ -20,19 +21,29 @@ class ChoiceScreen extends StatefulWidget {
   State<ChoiceScreen> createState() => _ChoiceScreenState();
 }
 
-class _ChoiceScreenState extends State<ChoiceScreen> {
+class _ChoiceScreenState extends State<ChoiceScreen> with TickerProviderStateMixin {
   int _currentQuestionIndex = 0;
   int _correctAnswersCount = 0;
   bool _isAnswered = false;
+  bool _isCorrect = false;
   List<int> _currentOptions = [];
-  List<String> _answerResults = [];
-
-
+  final List<String> _answerResults = [];
+  String _markText = '';
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
     _generateOptions();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    );
   }
 
   void _generateOptions() {
@@ -62,42 +73,47 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
 
     setState(() {
       _isAnswered = true;
-      if (isCorrect) _correctAnswersCount++;
+      _isCorrect = isCorrect;
+      _markText = isCorrect ? '◯' : '✕';
     });
+
+    _answerResults.add(
+      '${isCorrect ? "○" : "×"}: ${problem.question} : $correctAnswer : $selectedAnswer',
+    );
 
     widget.onAnswerSelected(problem, selectedAnswer.toDouble());
 
-    _answerResults.add(
-        '${isCorrect ? "○" : "×"}: ${problem.question} : $correctAnswer : $selectedAnswer');
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(isCorrect ? '正解！' : '不正解'),
-        content: Text(isCorrect
-            ? 'せいかいです！'
-            : 'ざんねん、まちがいです。こたえは$correctAnswerです。'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (_currentQuestionIndex < widget.problems.length - 1) {
-                setState(() {
-                  _currentQuestionIndex++;
-                  _isAnswered = false;
-                });
-                _generateOptions();
-              } else {
-                _showCompletionDialog();
-              }
-            },
-            child: const Text('次へ'),
-          ),
-        ],
-      ),
-    );
+    Future.delayed(const Duration(seconds: 1), () {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: Text(isCorrect ? '正解！' : '不正解'),
+          content: Text(isCorrect
+              ? 'せいかいです！'
+              : 'ざんねん、まちがいです。こたえは$correctAnswerです。'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                if (_currentQuestionIndex < widget.problems.length - 1) {
+                  setState(() {
+                    _currentQuestionIndex++;
+                    _isAnswered = false;
+                  });
+                  _generateOptions();
+                } else {
+                  _showCompletionDialog();
+                }
+              },
+              child: const Text('次へ'),
+            ),
+          ],
+        ),
+      );
+    });
   }
+
 
   void _showCompletionDialog() {
     Navigator.push(
@@ -123,78 +139,139 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     final problem = widget.problems[_currentQuestionIndex];
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              color: Colors.green,
-              padding: const EdgeInsets.all(16.0),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+          Column(
+            children: [
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(16.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          problem.question,
+                          style: const TextStyle(fontSize: 20, color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LevelScreen(onLevelSelected: (selectedLevel) {}),
+                    ),
+                  );
+                },
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      problem.question,
-                      style: const TextStyle(fontSize: 20, color: Colors.white),
-                      textAlign: TextAlign.center,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        width: 85,
+                        height: 20,
+                        color: Colors.black87,
+                        margin: const EdgeInsets.only(right: 5),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          color: Colors.brown,
+                          width: 50,
+                          height: 30,
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        width: 73,
+                        height: 7,
+                        margin: const EdgeInsets.only(right: 10),
+                        color: Colors.indigo,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-          Container(
-            color: Colors.brown,
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _currentOptions.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 5.0,
-                crossAxisSpacing: 10.0,
-                childAspectRatio: 5.0,
+              Container(
+                color: Colors.brown,
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _currentOptions.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10.0,
+                    crossAxisSpacing: 15.0,
+                    childAspectRatio: 3.5,
+                  ),
+                  itemBuilder: (context, index) {
+                    final option = _currentOptions[index];
+                    Color buttonColor;
+
+                    if (_isAnswered) {
+                      if (option == problem.answer.toInt()) {
+                        buttonColor = Colors.green;
+                      } else {
+                        buttonColor = Colors.red;
+                      }
+                    } else {
+                      buttonColor = Colors.blue;
+                    }
+
+                    return ElevatedButton(
+                      onPressed: _isAnswered ? null : () => _checkAnswer(option),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: buttonColor,
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        textStyle: const TextStyle(fontSize: 22),
+                      ),
+                      child: Text(
+                        option.toString(),
+                      ),
+                    );
+                  },
+                ),
               ),
-              itemBuilder: (context, index) {
-                final option = _currentOptions[index];
-                Color buttonColor;
-
-                if (_isAnswered) {
-                  if (option == problem.answer.toInt()) {
-                    buttonColor = Colors.green;
-                  } else {
-                    buttonColor = Colors.red;
-                  }
-                } else {
-                  buttonColor = Colors.blue;
-                }
-
-                return ElevatedButton(
-                  onPressed: _isAnswered ? null : () => _checkAnswer(option),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: buttonColor,
-                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 6.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+            ],
+          ),
+          if (_isAnswered)
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  _markText,
+                  style: TextStyle(
+                    fontSize: 300,
+                    fontWeight: FontWeight.bold,
+                    color: _isCorrect ? Colors.red : Colors.blue,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(3, 3),
+                        blurRadius: 5.0,
+                        color: Colors.black.withOpacity(0.7),
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    option.toString(),
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                );
-              },
+                ),
+              ),
             ),
-          )
         ],
       ),
     );

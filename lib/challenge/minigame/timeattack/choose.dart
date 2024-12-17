@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'TimeAttackIntroScreen.dart';
-import '../../home/challenge.dart';
+import '../../../home/challenge.dart';
 
 class ChooseScreen extends StatelessWidget {
   const ChooseScreen({super.key});

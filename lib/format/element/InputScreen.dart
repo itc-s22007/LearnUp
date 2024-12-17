@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import '../../models/problem.dart';
 import '../../Result/QuestionResults/InputResultScreen.dart';
@@ -16,7 +17,7 @@ class InputScreen extends StatefulWidget {
   State<InputScreen> createState() => _InputScreenState();
 }
 
-class _InputScreenState extends State<InputScreen> {
+class _InputScreenState extends State<InputScreen> with TickerProviderStateMixin {
   int _currentQuestionIndex = 0;
   int _correctAnswersCount = 0;
   bool _isAnswered = false;
@@ -25,6 +26,11 @@ class _InputScreenState extends State<InputScreen> {
   String _userFormula = "";
   String _userAnswer = "";
   bool _isFormulaMode = true;
+  bool _isCorrectMarkVisible = false;
+  String _markText = '';
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   void _addInput(String value) {
     if (!_isAnswered) {
@@ -56,17 +62,28 @@ class _InputScreenState extends State<InputScreen> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    );
+  }
+
   void _checkAnswer() {
     final currentProblem = widget.problems[_currentQuestionIndex];
     final correctAnswer = currentProblem.answer;
-
     if (_userFormula.isEmpty || _userAnswer.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('式と答えを両方入力してください。')),
       );
       return;
     }
-
     final userAnswerDouble = double.tryParse(_userAnswer);
     if (userAnswerDouble == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,11 +91,27 @@ class _InputScreenState extends State<InputScreen> {
       );
       return;
     }
-
     setState(() {
       _isAnswered = true;
       _isCorrect = (_userFormula == currentProblem.formula) &&
           (userAnswerDouble == correctAnswer);
+      _markText = _isCorrect ? '◯' : '✕';
+      _isCorrectMarkVisible = true;
+      _animationController.forward(from: 0);
+
+      if (_isCorrect) {
+        _playSound('assets/sounds/mp3/correct.mp3'); // 正解時の音声
+      } else {
+        _playSound('assets/sounds/mp3/wrong.mp3'); // 不正解時の音声
+      }
+
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          _isCorrectMarkVisible = false;
+        });
+        _showResultDialog(
+            _isCorrect, correctAnswer, double.tryParse(_userAnswer));
+      });
       if (_isCorrect) _correctAnswersCount++;
       _answerResults.add(
         '${_isCorrect ? "○" : "×"}: ${currentProblem
@@ -86,10 +119,8 @@ class _InputScreenState extends State<InputScreen> {
             .formula} : 正しい答え: $correctAnswer',
       );
     });
-
     widget.onAnswerEntered(
         currentProblem, _userFormula, double.parse(_userAnswer));
-    _showResultDialog(_isCorrect, correctAnswer, double.tryParse(_userAnswer));
   }
 
   void _skipQuestion() {
@@ -114,15 +145,19 @@ class _InputScreenState extends State<InputScreen> {
     final correctFormula = widget.problems[_currentQuestionIndex].formula;
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) =>
           AlertDialog(
             title: Text(
-                isCorrect ? '正解！' : skipped ? 'スキップしました' : '不正解'),
-            content: Text(skipped
-                ? 'スキップしました。\n正しい式: $correctFormula\n正しい答え: $correctAnswer'
-                : isCorrect
-                ? 'おめでとうございます！正解です。'
-                : '残念！\n正しい式: $correctFormula\n正しい答え: $correctAnswer\nあなたの式: $_userFormula\nあなたの答え: $userAnswer'),
+              isCorrect ? '正解！' : skipped ? 'スキップしました' : '不正解',
+            ),
+            content: Text(
+              skipped
+                  ? 'スキップしました。\n正しい式: $correctFormula\n正しい答え: $correctAnswer'
+                  : isCorrect
+                  ? 'おめでとうございます！正解です。'
+                  : '残念！\n正しい式: $correctFormula\n正しい答え: $correctAnswer\nあなたの式: $_userFormula\nあなたの答え: $userAnswer',
+            ),
             actions: [
               TextButton(
                 onPressed: () {
@@ -174,33 +209,75 @@ class _InputScreenState extends State<InputScreen> {
   }
 
   @override
+  void dispose() {
+    _audioPlayer.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _playSound(String soundFile) async {
+    try {
+      await _audioPlayer.play(AssetSource(soundFile));
+    } catch (e) {
+      print('音声再生エラー: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currentProblem = widget.problems[_currentQuestionIndex];
     return Scaffold(
       body: Column(
         children: [
           Expanded(
-            child: Container(
-              width: double.infinity,
-              color: Colors.green,
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '問題 ${_currentQuestionIndex + 1}/${widget.problems.length}',
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            child: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '問題 ${_currentQuestionIndex + 1}/${widget.problems
+                            .length}',
+                        style: const TextStyle(fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        currentProblem.question,
+                        style: const TextStyle(
+                            fontSize: 20, color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  // 問題のテキスト
-                  Text(
-                    currentProblem.question,
-                    style: const TextStyle(fontSize: 20, color: Colors.white),
-                    textAlign: TextAlign.center,
+                ),
+                if (_isCorrectMarkVisible)
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        _markText,
+                        style: TextStyle(
+                          fontSize: 300,
+                          fontWeight: FontWeight.bold,
+                          color: _isCorrect ? Colors.red : Colors.blue,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(3, 3),
+                              blurRadius: 5.0,
+                              color: Colors.black.withOpacity(0.7),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ],
-              ),
+              ],
             ),
           ),
           Container(
@@ -217,21 +294,21 @@ class _InputScreenState extends State<InputScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // 式
                       Text(
                         '式: $_userFormula',
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: const TextStyle(fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                       const SizedBox(width: 20),
-                      // 答え
                       Container(
-                        width: 100, // 固定幅を設定
-                        alignment: Alignment.center, // 中央揃え
+                        width: 100,
+                        alignment: Alignment.center,
                         child: Text(
                           '答え: $_userAnswer',
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: const TextStyle(fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
                         ),
                       ),
                     ],
@@ -266,7 +343,8 @@ class _InputScreenState extends State<InputScreen> {
                     ),
                     ElevatedButton(
                       onPressed: _clearInput,
-                      child: const Text('クリア', style: TextStyle(fontSize: 20)),
+                      child: const Text(
+                          'クリア', style: TextStyle(fontSize: 20)),
                     ),
                     ElevatedButton(
                       onPressed: _toggleInputMode,

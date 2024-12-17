@@ -15,6 +15,8 @@ class WaitingRoomScreen extends StatefulWidget {
 class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
   late CollectionReference _battleRooms;
   late Stream<DocumentSnapshot> _roomStream;
+  bool isMatched = false; // マッチング状態を追跡
+
   @override
   void initState() {
     super.initState();
@@ -37,58 +39,54 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
           final player2 = data['player2'];
           final currentPlayers = player2 != null ? 2 : 1;
 
-          if (currentPlayers == 2) {
+          // マッチングした場合の処理
+          if (currentPlayers == 2 && !isMatched) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                isMatched = true; // マッチングした状態にする
+              });
+
+              // マッチング後にダイアログを表示
               showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (BuildContext context) {
-                  int countdown = 3;
-                  return StatefulBuilder(
-                    builder: (context, setState) {
-                      Future.delayed(const Duration(seconds: 1), () {
-                        if (countdown > 1) {
-                          setState(() => countdown--);
-                        } else {
-                          Navigator.pop(context);
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RealTimeBattleScreen(
-                                roomId: widget.roomId,
-                                isHost: widget.isHost,
-                              ),
-                            ),
-                          );
-                        }
-                      });
-                      return AlertDialog(
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              '試合開始までお待ちください',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              '$countdown',
-                              style: const TextStyle(
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
-                          ],
+                  return AlertDialog(
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'マッチングしました！',
+                          style: TextStyle(fontSize: 18),
                         ),
-                      );
-                    },
+                        const SizedBox(height: 20),
+                        const Text(
+                          '試合を開始します。',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
                   );
                 },
               );
+
+              // 1秒後に試合画面に遷移
+              Future.delayed(const Duration(seconds: 1), () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RealTimeBattleScreen(
+                      roomId: widget.roomId,
+                      isHost: widget.isHost,
+                    ),
+                  ),
+                );
+              });
             });
           }
 
+          // プレイヤーがまだ2人集まっていない場合
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -116,3 +114,4 @@ class _WaitingRoomScreenState extends State<WaitingRoomScreen> {
     );
   }
 }
+

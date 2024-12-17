@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learnup/home/HomeScreen.dart';
+import 'package:learnup/home/LevelScreen.dart';
 import 'element/ChoiceScreen.dart';
 import 'element/InputScreen.dart';
 import '../unit/Unit.dart';
@@ -55,7 +56,7 @@ class FormatScreen extends StatelessWidget {
                 ),
               );
             }),
-            const Spacer(), // 下部に余白を追加
+            const Spacer(),
             Column(
               children: [
                 GestureDetector(
@@ -63,7 +64,7 @@ class FormatScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
+                        builder: (context) => LevelScreen(onLevelSelected: (selectedLevel) {}),
                       ),
                     );
                   },
@@ -98,7 +99,7 @@ class FormatScreen extends StatelessWidget {
                 ),
                 Container(
                   width: double.infinity,
-                  height: 50, // 茶色い部分に固定高さを設定
+                  height: 50,
                   color: Colors.brown,
                   alignment: Alignment.center,
                   child: const Text(
