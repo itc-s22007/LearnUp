@@ -1,8 +1,8 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/cupertino.dart';
 import '../CalculationBattle/Question/ProblemProvider.dart';
 import 'RealTimeResult.dart';
 
@@ -16,8 +16,8 @@ class RealTimeBattleScreen extends StatefulWidget {
   State<RealTimeBattleScreen> createState() => _RealTimeBattleScreenState();
 }
 
-
-class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
+class _RealTimeBattleScreenState extends State<RealTimeBattleScreen>
+    with SingleTickerProviderStateMixin {
   final ProblemProvider _problemProvider = ProblemProvider();
   List<String> questions = [];
   List<int> answers = [];
@@ -29,6 +29,10 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
   int countdownTime = 3;
   bool isGameReady = false;
   late StreamSubscription<DocumentSnapshot>? _battleRoomSubscription;
+  late AnimationController _animationController;
+  late Animation<double> _starAnimation;
+  bool showStars = false;
+  Color feedbackColor = Colors.white;
 
   @override
   void initState() {
@@ -36,27 +40,33 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
     battleRoom = FirebaseFirestore.instance.collection('battleRooms');
     _initializeGame();
 
-    // Listen to the battle room document.
     _battleRoomSubscription = battleRoom.doc(widget.roomId).snapshots().listen((snapshot) {
       final data = snapshot.data() as Map<String, dynamic>?;
-
       if (data != null) {
         if (mounted) {
           setState(() {
             opponentProgress = '${data['player2']?['progress'] ?? 0}/20';
           });
         }
-
-        if ((data['player1']?['progress'] ?? 0) >= 20 || (data['player2']?['progress'] ?? 0) >= 20) {
+        if ((data['player1']?['progress'] ?? 0) >= 20 ||
+            (data['player2']?['progress'] ?? 0) >= 20) {
           _showGameEndAnimation();
         }
       }
     });
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+
+    _starAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
   }
 
   Future<void> _initializeGame() async {
     final problemProvider = ProblemProvider();
-
     if (widget.isHost) {
       final newQuestions = List.generate(20, (_) => problemProvider.generateQuestion('add'));
       final newAnswers = newQuestions.map((q) {
@@ -78,14 +88,12 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
           isGameReady = true;
         });
       }
-
       if (isGameReady && isCountdownActive) {
         _startCountdown();
       }
     } else {
       battleRoom.doc(widget.roomId).snapshots().listen((snapshot) {
         final data = snapshot.data() as Map<String, dynamic>?;
-
         if (data != null) {
           if (mounted) {
             setState(() {
@@ -94,7 +102,6 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
               isGameReady = questions.isNotEmpty && answers.isNotEmpty;
             });
           }
-
           if (isGameReady && isCountdownActive) {
             _startCountdown();
           }
@@ -105,60 +112,54 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
 
   void _submitAnswer() {
     if (userAnswer.isEmpty) return;
-
     final int? parsedAnswer = int.tryParse(userAnswer);
-
     if (parsedAnswer != null &&
         currentQuestionIndex < answers.length &&
         parsedAnswer == answers[currentQuestionIndex]) {
       setState(() {
         currentQuestionIndex++;
         userAnswer = '';
+        feedbackColor = Colors.green;
+        showStars = true;
       });
-
+      _animationController.forward(from: 0);
       battleRoom.doc(widget.roomId).update({
         'player1.progress': currentQuestionIndex,
       });
-
-      // 勝敗判定: 両方が終わったらゲームを終了
       if (currentQuestionIndex >= questions.length) {
         _showGameEndAnimation();
       }
     } else {
+      setState(() {
+        feedbackColor = Colors.red;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('不正解です。もう一度挑戦してください。')),
       );
     }
   }
 
-
   void _startCountdown() {
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted && countdownTime > 1) {
-        if (mounted) {
-          setState(() {
-            countdownTime--;
-          });
-        }
+        setState(() {
+          countdownTime--;
+        });
         _startCountdown();
       } else {
-        if (mounted) {
-          setState(() {
-            countdownTime = 0;
-            isCountdownActive = false;
-          });
-        }
+        setState(() {
+          countdownTime = 0;
+          isCountdownActive = false;
+        });
         _startGame();
       }
     });
   }
 
   void _startGame() {
-    if (mounted) {
-      setState(() {
-        currentQuestionIndex = 0;
-      });
-    }
+    setState(() {
+      currentQuestionIndex = 0;
+    });
   }
 
   void _showGameEndAnimation() {
@@ -177,7 +178,6 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
         ),
       ),
     );
-
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pop(context);
       Navigator.pushReplacement(
@@ -191,66 +191,75 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
 
   @override
   void dispose() {
-    // Cancel the countdown or any subscriptions.
     _battleRoomSubscription?.cancel();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('リアルタイム対戦'),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue, Colors.purple],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Stack(
           children: [
-            Text(
-              '相手の進捗: $opponentProgress',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                if (isCountdownActive)
+                  FadeTransition(
+                    opacity: _starAnimation,
+                    child: Text(
+                      '$countdownTime',
+                      style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.yellow),
+                    ),
+                  )
+                else
+                  Text(
+                    questions.isNotEmpty ? questions[currentQuestionIndex] : '問題がありません',
+                    style: const TextStyle(fontSize: 30, color: Colors.white),
+                  ),
+                if (!isCountdownActive)
+                  Column(
+                    children: [
+                      TextField(
+                        onChanged: (value) => setState(() => userAnswer = value),
+                        onSubmitted: (_) => _submitAnswer(),
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          hintText: '答えを入力してください',
+                          fillColor: feedbackColor,
+                          filled: true,
+                          prefixIcon: const Icon(Icons.edit),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'あなたの進捗: ${currentQuestionIndex + 1}/${questions.length}',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ],
+                  ),
+              ],
             ),
-            const SizedBox(height: 16),
-            isCountdownActive
-                ? Text(
-              '$countdownTime',
-              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-            )
-                : isGameReady
-                ? Text(
-              questions.isNotEmpty
-                  ? questions[currentQuestionIndex]
-                  : '問題が読み込まれませんでした。',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            )
-                : const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            if (!isCountdownActive)
-              TextField(
-                onChanged: (value) {
-                  if (mounted) {
-                    setState(() {
-                      userAnswer = value;
-                    });
-                  }
-                },
-                onSubmitted: (_) {
-                  _submitAnswer();
-                },
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: '答えを入力してください',
-                  labelText: '回答',
+            if (showStars)
+              Align(
+                alignment: Alignment.topCenter,
+                child: ScaleTransition(
+                  scale: _starAnimation,
+                  child: const Icon(Icons.star, size: 100, color: Colors.yellow),
                 ),
-              ),
-            if (!isCountdownActive && questions.isNotEmpty)
-              Text(
-                'あなたの進捗: ${currentQuestionIndex + 1}/${questions.length}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
           ],
         ),
@@ -258,4 +267,3 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen> {
     );
   }
 }
-

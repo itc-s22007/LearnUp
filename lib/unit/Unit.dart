@@ -129,7 +129,7 @@ class UnitScreen extends StatelessWidget {
 
   List<Unit> _getUnitsForGrade(String grade) {
     switch (grade) {
-      case '1年生':
+      case '１年生':
         return [
           Unit(title: 'たしざん(１ケタ、２ケタ）', widget: const Plus1(format: ''), problems: Plus1.generateProblems()),
           Unit(title: 'たしざんのあなうめ', widget: const bp.BlankPlus(format: ''), problems: bp.BlankPlus.generateProblems()),
