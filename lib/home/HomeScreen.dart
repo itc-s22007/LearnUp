@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import '../screens/progress_screen.dart';
 import 'Profile.dart';
 import 'LevelScreen.dart';
@@ -24,12 +25,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   int challengeCount = 0;
+  int dailyGoal = 5; // デフォルト目標回数
 
   @override
   void initState() {
     super.initState();
     _loadUserDetails();
+    _resetChallengeIfNeeded();
     _loadChallengeCount();
+    _loadDailyGoal();
     _calendarFormat = CalendarFormat.month;
     _selectedDay = DateTime.now();
     _focusedDay = DateTime.now();
@@ -45,6 +49,32 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ));
   }
 
+  Future<void> _resetChallengeIfNeeded() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final Map<String, dynamic>? userData = doc.data();
+
+      if (userData != null) {
+        final String? lastResetDateStr = userData['lastResetDate'];
+        final lastResetDate = lastResetDateStr != null ? DateTime.parse(lastResetDateStr) : null;
+        final today = DateTime.now();
+
+        if (lastResetDate == null || !isSameDay(lastResetDate, today)) {
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+            'challengeCount': 0,
+            'lastResetDate': DateFormat('yyyy-MM-dd').format(today),
+          });
+
+          setState(() {
+            challengeCount = 0;
+          });
+        }
+      }
+    }
+  }
+
+
   Future<void> _loadChallengeCount() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -55,18 +85,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     }
   }
 
-  Future<void> _saveGoalCompletion(DateTime date) async {
-    User? user = FirebaseAuth.instance.currentUser;
+  Future<void> _loadDailyGoal() async {
+    final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      DateTime dayOnly = DateTime(date.year, date.month, date.day);
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('completedGoals')
-          .doc(dayOnly.toIso8601String()) // ドキュメントIDを日付に設定
-          .set({'date': dayOnly.toIso8601String()});
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       setState(() {
-        completedDays.add(dayOnly);
+        dailyGoal = doc.data()?['dailyGoal'] ?? 5;
       });
     }
   }
@@ -87,6 +111,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       });
     }
   }
+
+  Future<void> _saveCompletedDay(DateTime date) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('completedGoals')
+          .doc(formattedDate)
+          .set({'date': formattedDate});
+      setState(() {
+        completedDays.add(date);
+      });
+    }
+  }
+
+  bool _isDayCompleted(DateTime day) {
+    return completedDays.any((completedDay) => isSameDay(completedDay, day));
+  }
+
+  void _onDailyGoalAchieved() async {
+    final today = DateTime.now();
+    await _saveCompletedDay(today);
+  }
+
+
   Widget _buildCalendar() {
     return Container(
       margin: const EdgeInsets.all(10),
@@ -116,15 +167,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, day, events) {
-                bool isSameDay(DateTime date1, DateTime date2) {
-                  return date1.year == date2.year &&
-                      date1.month == date2.month &&
-                      date1.day == date2.day;
-                }
-                if (completedDays.any((completedDay) => isSameDay(completedDay, day))) {
-                  return const Icon(
+                if (_isDayCompleted(day)) {
+                  // 目標達成状態を判定してチェックマークの色を切り替え
+                  bool isGoalAchieved = day.year == DateTime.now().year &&
+                      day.month == DateTime.now().month &&
+                      day.day == DateTime.now().day &&
+                      challengeCount >= dailyGoal;
+
+                  return Icon(
                     Icons.check_circle,
-                    color: Colors.red,
+                    color: isGoalAchieved ? Colors.red : Colors.green,
                     size: 18,
                   );
                 }
@@ -143,6 +195,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
+
+
   Future<void> _loadUserDetails() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -153,6 +207,54 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       });
     }
   }
+  Widget _buildDailyGoals() {
+    bool _isGoalAchieved = challengeCount >= 5;
+
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "今日の目標",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "現在の挑戦回数: $challengeCount 回",
+                style: const TextStyle(fontSize: 16),
+              ),
+              if (_isGoalAchieved)
+                const Icon(Icons.check_circle, color: Colors.green),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "問題モードで5個の単元に挑戦する",
+                style: TextStyle(fontSize: 16),
+              ),
+              Icon(
+                _isGoalAchieved ? Icons.check_circle : Icons.circle_outlined,
+                color: _isGoalAchieved ? Colors.green : Colors.grey,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -239,53 +341,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildDailyGoals() {
-    bool _isGoalAchieved = challengeCount >= 5;
-
-    return Container(
-      margin: const EdgeInsets.all(10),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "今日の目標",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "現在の挑戦回数: $challengeCount 回",
-                style: const TextStyle(fontSize: 16),
-              ),
-              if (_isGoalAchieved)
-                const Icon(Icons.check_circle, color: Colors.green),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "問題モードで5個の単元に挑戦する",
-                style: TextStyle(fontSize: 16),
-              ),
-              Icon(
-                _isGoalAchieved ? Icons.check_circle : Icons.circle_outlined,
-                color: _isGoalAchieved ? Colors.green : Colors.grey,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildMenuColumn(String title, Color color, Widget screen) {
     return Column(
