@@ -48,7 +48,7 @@ class UnitScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
-                        _navigateToFormatScreen(context, units[index]);
+                      _navigateToFormatScreen(context, units[index]);
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),

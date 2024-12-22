@@ -25,7 +25,8 @@ class ChooseScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TimeAttackIntroScreen(operation: 'subtract'),
+              builder: (context) =>
+                  TimeAttackIntroScreen(operation: 'subtract'),
             ),
           );
         },
@@ -36,7 +37,8 @@ class ChooseScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TimeAttackIntroScreen(operation: 'multiply'),
+              builder: (context) =>
+                  TimeAttackIntroScreen(operation: 'multiply'),
             ),
           );
         },
@@ -63,7 +65,8 @@ class ChooseScreen extends StatelessWidget {
           children: [
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 5, horizontal: 30),
                 itemCount: challenges.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
@@ -90,9 +93,9 @@ class ChooseScreen extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) => const ChallengeScreen()),
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ChallengeScreen()),
                     );
                   },
                   child: Column(

@@ -14,7 +14,8 @@ class ChoiceScreen extends StatefulWidget {
     Key? key,
     required this.problems,
     required this.onAnswerSelected,
-    this.unit, required void Function(Problem problem, double userAnswer) onAnswerEntered,
+    this.unit,
+    required void Function(Problem problem, double userAnswer) onAnswerEntered,
   }) : super(key: key);
 
   @override
@@ -89,9 +90,9 @@ class _ChoiceScreenState extends State<ChoiceScreen> with TickerProviderStateMix
         barrierDismissible: false,
         builder: (context) => AlertDialog(
           title: Text(isCorrect ? '正解！' : '不正解'),
-          content: Text(isCorrect
-              ? 'せいかいです！'
-              : 'ざんねん、まちがいです。こたえは$correctAnswerです。'),
+          content: Text(
+            isCorrect ? 'せいかいです！' : 'ざんねん、まちがいです。こたえは$correctAnswerです。',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -113,7 +114,6 @@ class _ChoiceScreenState extends State<ChoiceScreen> with TickerProviderStateMix
       );
     });
   }
-
 
   void _showCompletionDialog() {
     Navigator.push(
@@ -143,136 +143,99 @@ class _ChoiceScreenState extends State<ChoiceScreen> with TickerProviderStateMix
   Widget build(BuildContext context) {
     final problem = widget.problems[_currentQuestionIndex];
     return Scaffold(
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(16.0),
-                  child: Padding(
+      body: Container(
+        color: Colors.green,
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          problem.question,
-                          style: const TextStyle(fontSize: 20, color: Colors.white),
-                          textAlign: TextAlign.center,
+                    child: Center(
+                      child: Text(
+                        problem.question,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Colors.brown,
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _currentOptions.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10.0,
+                      crossAxisSpacing: 15.0,
+                      childAspectRatio: 3.5,
+                    ),
+                    itemBuilder: (context, index) {
+                      final option = _currentOptions[index];
+                      Color buttonColor;
+
+                      if (_isAnswered) {
+                        if (option == problem.answer.toInt()) {
+                          buttonColor = Colors.green;
+                        } else {
+                          buttonColor = Colors.red;
+                        }
+                      } else {
+                        buttonColor = const Color(0xFF388E3C);
+                      }
+
+                      return ElevatedButton(
+                        onPressed: _isAnswered ? null : () => _checkAnswer(option),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: buttonColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        child: Text(
+                          option.toString(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            if (_isAnswered)
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    _markText,
+                    style: TextStyle(
+                      fontSize: 300,
+                      fontWeight: FontWeight.bold,
+                      color: _isCorrect ? Colors.red : Colors.blue,
+                      shadows: [
+                        Shadow(
+                          offset: const Offset(3, 3),
+                          blurRadius: 5.0,
+                          color: Colors.black.withOpacity(0.7),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LevelScreen(onLevelSelected: (selectedLevel) {}),
-                    ),
-                  );
-                },
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        width: 85,
-                        height: 20,
-                        color: Colors.black87,
-                        margin: const EdgeInsets.only(right: 5),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          color: Colors.brown,
-                          width: 50,
-                          height: 30,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        width: 73,
-                        height: 7,
-                        margin: const EdgeInsets.only(right: 10),
-                        color: Colors.indigo,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                color: Colors.brown,
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _currentOptions.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 10.0,
-                    crossAxisSpacing: 15.0,
-                    childAspectRatio: 3.5,
-                  ),
-                  itemBuilder: (context, index) {
-                    final option = _currentOptions[index];
-                    Color buttonColor;
-
-                    if (_isAnswered) {
-                      if (option == problem.answer.toInt()) {
-                        buttonColor = Colors.green;
-                      } else {
-                        buttonColor = Colors.red;
-                      }
-                    } else {
-                      buttonColor = Colors.blue;
-                    }
-
-                    return ElevatedButton(
-                      onPressed: _isAnswered ? null : () => _checkAnswer(option),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: buttonColor,
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        textStyle: const TextStyle(fontSize: 22),
-                      ),
-                      child: Text(
-                        option.toString(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          if (_isAnswered)
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  _markText,
-                  style: TextStyle(
-                    fontSize: 300,
-                    fontWeight: FontWeight.bold,
-                    color: _isCorrect ? Colors.red : Colors.blue,
-                    shadows: [
-                      Shadow(
-                        offset: Offset(3, 3),
-                        blurRadius: 5.0,
-                        color: Colors.black.withOpacity(0.7),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -32,13 +32,13 @@ class LevelScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: leftLevels.map((level) {
                         return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => UnitScreen(grade: level),
-                              ),
-                            );
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => UnitScreen(grade: level),
+                                ),
+                              );
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 40),
