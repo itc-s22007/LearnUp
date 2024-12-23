@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:learnup/challenge/minigame/number/NumberIntro.dart';
+import 'package:learnup/challenge/minigame/number/NumberScreen.dart';
 import 'package:learnup/challenge/realtime/CalculationBattle/MatchRoom.dart';
 import 'HomeScreen.dart';
 import '../challenge/minigame/timeattack/choose.dart';
@@ -15,6 +17,15 @@ class ChallengeScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ChooseScreen()),
+          );
+        },
+      ),
+      Challenge(
+        title: 'ナンバープレート',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NumberIntroScreen()),
           );
         },
       ),
