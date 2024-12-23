@@ -33,6 +33,8 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen>
   late Animation<double> _starAnimation;
   bool showStars = false;
   Color feedbackColor = Colors.white;
+  final TextEditingController _textController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -126,6 +128,8 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen>
       battleRoom.doc(widget.roomId).update({
         'player1.progress': currentQuestionIndex,
       });
+      _textController.clear();
+      _focusNode.requestFocus();
       if (currentQuestionIndex >= questions.length) {
         _showGameEndAnimation();
       }
@@ -133,6 +137,8 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen>
       setState(() {
         feedbackColor = Colors.red;
       });
+      _textController.clear();
+      _focusNode.requestFocus();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('不正解です。もう一度挑戦してください。')),
       );
@@ -191,6 +197,8 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen>
 
   @override
   void dispose() {
+    _textController.dispose();
+    _focusNode.dispose();
     _battleRoomSubscription?.cancel();
     _animationController.dispose();
     super.dispose();
@@ -219,18 +227,29 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen>
                     opacity: _starAnimation,
                     child: Text(
                       '$countdownTime',
-                      style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.yellow),
+                      style: const TextStyle(
+                        fontSize: 60,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.yellow,
+                      ),
                     ),
                   )
                 else
                   Text(
-                    questions.isNotEmpty ? questions[currentQuestionIndex] : '問題がありません',
-                    style: const TextStyle(fontSize: 30, color: Colors.white),
+                    questions.isNotEmpty
+                        ? questions[currentQuestionIndex]
+                        : '問題がありません',
+                    style: const TextStyle(
+                      fontSize: 30,
+                      color: Colors.white,
+                    ),
                   ),
                 if (!isCountdownActive)
                   Column(
                     children: [
                       TextField(
+                        controller: _textController, // TextEditingControllerを使用
+                        focusNode: _focusNode, // FocusNodeを設定
                         onChanged: (value) => setState(() => userAnswer = value),
                         onSubmitted: (_) => _submitAnswer(),
                         keyboardType: TextInputType.number,
@@ -247,7 +266,11 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen>
                       const SizedBox(height: 10),
                       Text(
                         'あなたの進捗: ${currentQuestionIndex + 1}/${questions.length}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -258,7 +281,11 @@ class _RealTimeBattleScreenState extends State<RealTimeBattleScreen>
                 alignment: Alignment.topCenter,
                 child: ScaleTransition(
                   scale: _starAnimation,
-                  child: const Icon(Icons.star, size: 100, color: Colors.yellow),
+                  child: const Icon(
+                    Icons.star,
+                    size: 100,
+                    color: Colors.yellow,
+                  ),
                 ),
               ),
           ],
