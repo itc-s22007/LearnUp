@@ -280,19 +280,18 @@ class _ReviewInputState extends State<ReviewInput> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // 式
                       Text(
-                        '式: $_userFormula',
+                        '式:$_userFormula',
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(width: 20),
                       // 答え
                       Container(
-                        width: 100, // 固定幅を設定
-                        alignment: Alignment.center, // 中央揃え
+                        width: 100,
+                        alignment: Alignment.center,
                         child: Text(
-                          '答え: $_userAnswer',
+                          '答え:$_userAnswer',
                           style: const TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
