@@ -161,7 +161,7 @@
 ### Flutter SDK のインストールと確認方法
 私たちはAndroidStudioでFlutterを使用したので、その方法を下記に記述します。
 
-１．Flutter公式サイト（https://flutter.dev）
+１．Flutter公式サイト(https://flutter.dev)
 
 ２．「Get Started」→「Install」からLinuxを選択
 
