@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:learnup/unit/school%20year/4th/Parenthesis.dart';
-import 'package:learnup/unit/school%20year/4th/SentenceParenthesis.dart';
+import 'package:learnup/unit/school%20year/5th/Parenthesis.dart';
+import 'package:learnup/unit/school%20year/5th/SentenceParenthesis.dart';
 import 'package:learnup/unit/school%20year/4th/fraction.dart';
+import 'package:learnup/unit/school%20year/5th/division3.dart';
+import 'package:learnup/unit/school%20year/5th/multiplicative3.dart';
+import 'package:learnup/unit/school%20year/6th/Minus4.dart';
+import 'package:learnup/unit/school%20year/6th/Plus4.dart';
+import 'package:learnup/unit/school%20year/6th/division4.dart';
+import 'package:learnup/unit/school%20year/6th/multiplicative4.dart';
 import 'school year/1st/Minus.dart';
 import 'school year/1st/Plus.dart';
 import 'school year/1st/SentenceMinus.dart';
@@ -158,9 +164,21 @@ class UnitScreen extends StatelessWidget {
         return [
           Unit(title: '割り算(２ケタ)', widget: const DivisionProblems2(format: ''), problems: DivisionProblems2.generateProblems()),
           Unit(title: 'がい数', widget: const RoundingProblems(format: ''), problems: RoundingProblems.generateProblems()),
+          Unit(title: '分数', widget: const FractionAddition(), problems: FractionAddition.generateProblems())
+        ];
+      case '5年生':
+        return [
+          Unit(title: '掛け算(3ケタ)', widget: const Multiplicative3(format: ''), problems: Multiplicative3.generateProblems()),
+          Unit(title: '割り算(3ケタ)', widget: const DivisionProblems3(format: ''), problems: DivisionProblems3.generateProblems()),
           Unit(title: '(  )の計算', widget: const ParenthesisProblems(format: ''), problems: ParenthesisProblems.generateProblems()),
           Unit(title: '(  )の文章問題', widget: const ParenthesisWordProblems(format: ''), problems: ParenthesisWordProblems.generateProblems()),
-          Unit(title: '分数', widget: const FractionAddition(), problems: FractionAddition.generateProblems())
+        ];
+      case '6年生':
+        return [
+          Unit(title: '足し算(４ケタ)', widget: const Plus4(format: ''), problems: Plus4.generateProblems()),
+          Unit(title: '引き算(４ケタ)', widget: const Minus4(format: ''), problems: Minus4.generateProblems()),
+          Unit(title: '掛け算(４ケタ)', widget: const Multiplicative4(format: ''), problems: Multiplicative4.generateProblems()),
+          Unit(title: '割り算(４ケタ)', widget: const DivisionProblems4(format: ''), problems: DivisionProblems4.generateProblems()),
         ];
       default:
         return [];
